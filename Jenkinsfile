@@ -32,6 +32,7 @@ podTemplate(label: 'pipeline', containers: [
         def globalDNS = configVars.globals.globalDNS
         def jenkinsDNS = configVars.globals.jenkinsServer+"."+configVars.globals.globalDNS
         def infraFolder = configVars.app01.infraFolder
+        def appFolder = configVars.app01.appFolder
 
         //Tests - initialize helm
         stage ('init helm') {
