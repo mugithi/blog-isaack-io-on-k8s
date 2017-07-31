@@ -8,7 +8,8 @@
     "globalDNS": "isaack.io.",
     "repo": "https://github.com/mugithi/blog-isaack-io-on-k8s.git",
     "repoCreds": "github",
-    "appFolder": "./isaack-io",
+    "infraFolder": "./infra-isaack-io",
+    "appFolder": "./app-isaack-io",
     "region": "us-east-1"
   }
 }

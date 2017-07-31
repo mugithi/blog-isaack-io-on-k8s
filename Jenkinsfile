@@ -31,7 +31,7 @@ podTemplate(label: 'pipeline', containers: [
         //set vars from jenkinsfile.json file
         def globalDNS = configVars.globals.globalDNS
         def jenkinsDNS = configVars.globals.jenkinsServer+"."+configVars.globals.globalDNS
-        def appFolder = configVars.app01.appFolder
+        def infraFolder = configVars.app01.infraFolder
 
         //Tests - initialize helm
         stage ('init helm') {
@@ -43,11 +43,11 @@ podTemplate(label: 'pipeline', containers: [
         // Dry run the helm chart and make sure that the variabales are being renered
         stage ('dry run the helm chart') {
              container ('helm' ) {
-                // sh "helm lint $appFolder"
+                // sh "helm lint $infraFolder"
                 println "print helm listt"
                 sh "helm list"
                 println "perform dry run"
-                sh "helm install $appFolder --dry-run --debug "
+                sh "helm install $infraFolder --dry-run --debug "
 
           }
         }
@@ -55,11 +55,9 @@ podTemplate(label: 'pipeline', containers: [
         stage ('build website and push to dockerhub') {
           container('docker') {
             println "pulling content from github"
-            git credentialsId: 'github',
-                url: 'https://github.com/mugithi/blog.git'
-            
+
             sh "ls -al"
-            // sh "docker build -t mugithi/blog:${BUILD_TAG} ."
+            sh "docker build -t mugithi/blog:${BUILD_TAG} $infraFolder/"
             withCredentials([[$class: 'UsernamePasswordMultiBinding',
        // set the dockerhub credentials
             credentialsId: 'github',
@@ -68,7 +66,7 @@ podTemplate(label: 'pipeline', containers: [
                      sh( returnStdout: true, script: "echo $DOCKER_USERNAME && echo $DOCKER_PASSWORD && echo $BUILD_TAG")
                     }
                 }
-            
+
         }
 
         if (env.BRANCH_NAME == 'master') {
@@ -101,7 +99,7 @@ podTemplate(label: 'pipeline', containers: [
                 def appzoneid = appzoneidlist[2]
 
                 ////////////////////////////////////////////////////////////////////////////////
-                // Create DNS entries using Terraform 
+                // Create DNS entries using Terraform
                 ////////////////////////////////////////////////////////////////////////////////
                 println "terraform: perform terraform apply"
                 sh( returnStdout: true, script: "terraform plan -var elb_name=$elbdns -var zone_id=$appzoneid -var zone_name=$appDNS -var elb_zone_id=$elbhostid -var region=$awsRegion  --input=false")
@@ -111,18 +109,18 @@ podTemplate(label: 'pipeline', containers: [
               }
 
             }
-            
+
             stage ('install helm chart') {
                 ////////////////////////////////////////////////////////////////////////////////
-                // Install HELM chart 
+                // Install HELM chart
                 ////////////////////////////////////////////////////////////////////////////////
                 container ('helm' ) {
                     println "Starting the install of the helm chart"
-                    sh "helm upgrade --install ${BRANCH_NAME} $appFolder --set image.tag=$BUILD_TAG"
-           
+                    sh "helm upgrade --install ${BRANCH_NAME} $infraFolder --set image.tag=$BUILD_TAG"
+
                 }
                 ////////////////////////////////////////////////////////////////////////////////
-                // Print the kubenernetes status 
+                // Print the kubenernetes status
                 ////////////////////////////////////////////////////////////////////////////////
                 container('kubectl') {
                   println "print the container environment"
@@ -141,7 +139,7 @@ podTemplate(label: 'pipeline', containers: [
             def appDNS = configVars.app01.name+"-"+branchName+"."+appGlobalDNS
             String nodotappDNS = appDNS[0..-2]
             def awsRegion = configVars.app01.region
-            
+
 
             /////////////////////////////////////////////////////////////////////////////////////
             // Create chart DNS entry
@@ -157,10 +155,10 @@ podTemplate(label: 'pipeline', containers: [
                 String[] zoneidlist
                 zoneidlist = hostzoneid.split('/')
                 def zoneid = zoneidlist[2]
-                def elbdns = sh(returnStdout: true, script: " aws route53 list-resource-record-sets --hosted-zone-id $zoneid --query ResourceRecordSets[?Name==\\`$jenkinsDNS\\`].AliasTarget[].DNSName --output text").trim()   
+                def elbdns = sh(returnStdout: true, script: " aws route53 list-resource-record-sets --hosted-zone-id $zoneid --query ResourceRecordSets[?Name==\\`$jenkinsDNS\\`].AliasTarget[].DNSName --output text").trim()
                 def elbhostid = sh(returnStdout: true, script: " aws route53 list-resource-record-sets --hosted-zone-id $zoneid --query ResourceRecordSets[?Name==\\`$jenkinsDNS\\`].AliasTarget[].HostedZoneId --output text  ").trim()
-                
-                
+
+
                 ////////////////////////////////////////////////////////////////////////////////
                 // Retrieve using AWSCLI GLOBALAPPDNSZONEID and storage them in VARIABLE
                 ////////////////////////////////////////////////////////////////////////////////
@@ -172,7 +170,7 @@ podTemplate(label: 'pipeline', containers: [
 
 
                 ////////////////////////////////////////////////////////////////////////////////////
-                // Create AWS DNS entries using terraform 
+                // Create AWS DNS entries using terraform
                 ////////////////////////////////////////////////////////////////////////////////////
                 println "terraform: perform terraform plan"
                 // ENABLE DEBUG MODE "export TF_LOG=TRACE && ""
@@ -189,12 +187,12 @@ podTemplate(label: 'pipeline', containers: [
                 // Create container chart that using HELM
                 ////////////////////////////////////////////////////////////////////////////////////
                 println "Starting the install of the helm chart"
-                sh "helm upgrade --install --set ingress.hosts=$nodotappDNS $branchName $appFolder --set image.tag=$BUILD_TAG"
+                sh "helm upgrade --install --set ingress.hosts=$nodotappDNS $branchName $infraFolder --set image.tag=$BUILD_TAG"
                 println "Show the output of the helm install"
                 }
 
                 ////////////////////////////////////////////////////////////////////////////////////
-                // Pring the current Kubernetes envrioment 
+                // Pring the current Kubernetes envrioment
                 ////////////////////////////////////////////////////////////////////////////////////
                 container('kubectl') {
                   println "print the container environment"
@@ -203,7 +201,7 @@ podTemplate(label: 'pipeline', containers: [
             }
             stage ('clean up charts and DNS entries') {
               ////////////////////////////////////////////////////////////////////////////////////
-              // User Prompt to check whether they are ready to clean up PR environment 
+              // User Prompt to check whether they are ready to clean up PR environment
               ////////////////////////////////////////////////////////////////////////////////////
               def userInput = input id: 'Promote', message: 'Are you ready to Clean up this deployment and delete DNS and Helm Files?', parameters: [choice(choices: 'Yes\nNo', description: '', name: 'answer')]
               echo ("Answer: ${userInput}")
@@ -214,7 +212,7 @@ podTemplate(label: 'pipeline', containers: [
 
               if (userInput == "Yes") {
                 ////////////////////////////////////////////////////////////////////////////////////
-                // Clean up Helm Chart 
+                // Clean up Helm Chart
                 ////////////////////////////////////////////////////////////////////////////////////
                 container ('helm' ) {
                   println "Starting cleanup of the Helm Chart"
@@ -222,7 +220,7 @@ podTemplate(label: 'pipeline', containers: [
                   }
                 ///////////////////////////////////////////////////////////////////////////////////
                 // Clean up DNS entrie using Helm chart
-                ////////////////////////////////////////////////////////////////////////////////////  
+                ////////////////////////////////////////////////////////////////////////////////////
                 container('terraform-aws') {
                   println "awscli: retrieve DNS hostid and store it in variable"
                   def hostzoneid = sh(script: " aws route53 list-hosted-zones --query HostedZones[?Name==\\`$globalDNS\\`].Id --output text ", returnStdout: true).trim()
