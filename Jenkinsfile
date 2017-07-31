@@ -65,8 +65,7 @@ podTemplate(label: 'pipeline', containers: [
             credentialsId: 'github',
             passwordVariable: 'DOCKER_PASSWORD',
             usernameVariable: 'DOCKER_USERNAME']]) {
-                     sh( returnStdout: true, script: "
-                     echo $DOCKER_USERNAME && echo $DOCKER_PASSWORD && echo $BUILD_TAG")
+                     sh( returnStdout: true, script: "echo $DOCKER_USERNAME && echo $DOCKER_PASSWORD && echo $BUILD_TAG")
                     }
                 }
             
