@@ -53,8 +53,8 @@ podTemplate(label: 'pipeline', containers: [
         }
 
         if (env.BRANCH_NAME == 'master') {
-
-            def appDNS = configVars.app01.name+"."+configVars.app01.globalDNS
+            def appGlobalDNS = configVars.app01.globalDNS
+            def appDNS = configVars.app01.name+"."+appGlobalDNS
             def awsRegion = configVars.app01.region
 
             stage ('create chart dns entry' ) {
@@ -65,7 +65,7 @@ podTemplate(label: 'pipeline', containers: [
                 zoneidlist = hostzoneid.split('/')
                 def zoneid = zoneidlist[2]
                 def elbdns = sh(returnStdout: true, script: " aws route53 list-resource-record-sets --hosted-zone-id $zoneid --query ResourceRecordSets[?Name==\\`$jenkinsDNS\\`].AliasTarget[].DNSName --output text").trim()
-                def elbhostid = sh(returnStdout: true, script: " aws route53 list-resource-record-sets --hosted-zone-id $zoneid --query ResourceRecordSets[?Name==\\`$jenkinsDNS\\`].AliasTarget[].HostedZoneId --output text  ").trim()
+                def elbhostid = sh(returnStdout: true, script: " aws route53 list-resource-record-sets --hosted-zone-id $zoneid --query ResourceRecordSets[?Name==\\`$appGlobalDNS\\`].AliasTarget[].HostedZoneId --output text  ").trim()
 
                 println "terraform: perform terraform apply"
                 sh( returnStdout: true, script: "terraform plan -var elb_name=$elbdns -var zone_id=$zoneid -var zone_name=$appDNS -var elb_zone_id=$elbhostid -var region=$awsRegion  --input=false")
@@ -89,7 +89,8 @@ podTemplate(label: 'pipeline', containers: [
 
         if (env.BRANCH_NAME =~ "PR-*" ) {
             def branchName = env.BRANCH_NAME.toLowerCase()
-            def appDNS = configVars.app01.name+"-"+branchName+"."+configVars.app01.globalDNS
+            def appGlobalDNS = configVars.app01.globalDNS
+            def appDNS = configVars.app01.name+"-"+branchName+"."+appGlobalDNS
             String nodotappDNS = appDNS[0..-2]
             def awsRegion = configVars.app01.region
 
@@ -102,8 +103,9 @@ podTemplate(label: 'pipeline', containers: [
                 zoneidlist = hostzoneid.split('/')
                 def zoneid = zoneidlist[2]
                 def elbdns = sh(returnStdout: true, script: " aws route53 list-resource-record-sets --hosted-zone-id $zoneid --query ResourceRecordSets[?Name==\\`$jenkinsDNS\\`].AliasTarget[].DNSName --output text").trim()
-                def elbhostid = sh(returnStdout: true, script: " aws route53 list-resource-record-sets --hosted-zone-id $zoneid --query ResourceRecordSets[?Name==\\`$jenkinsDNS\\`].AliasTarget[].HostedZoneId --output text  ").trim()
-
+                print elbdns
+                def elbhostid = sh(returnStdout: true, script: " aws route53 list-resource-record-sets --hosted-zone-id $zoneid --query ResourceRecordSets[?Name==\\`$appGlobalDNS\\`].AliasTarget[].HostedZoneId --output text  ").trim()
+                print elbhostid 
                 println "terraform: perform terraform plan"
                 // ENABLE DEBUG MODE "export TF_LOG=TRACE && ""
                 sh( returnStdout: true, script: "terraform plan -var elb_name=$elbdns -var zone_id=$zoneid -var zone_name=$appDNS -var elb_zone_id=$elbhostid -var region=$awsRegion  --input=false")
