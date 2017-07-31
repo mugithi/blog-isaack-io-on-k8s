@@ -59,13 +59,14 @@ podTemplate(label: 'pipeline', containers: [
                 url: 'https://github.com/mugithi/blog.git'
             
             sh "ls -al"
-            sh "docker build -t mugithi/blog:${BUILD_TAG} ."
+            // sh "docker build -t mugithi/blog:${BUILD_TAG} ."
             withCredentials([[$class: 'UsernamePasswordMultiBinding',
        // set the dockerhub credentials
             credentialsId: 'github',
             passwordVariable: 'DOCKER_PASSWORD',
             usernameVariable: 'DOCKER_USERNAME']]) {
-                sh '''docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
+                sh '''echo {DOCKER_PASSWORD} ${DOCKER_USERNAME}
+                      docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} 
                       docker push mugithi/blog:${BUILD_TAG}'''
                     }
                 }
