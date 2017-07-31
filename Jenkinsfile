@@ -57,7 +57,7 @@ podTemplate(label: 'pipeline', containers: [
             println "pulling content from github"
 
             sh "ls -al"
-            sh "docker build -t mugithi/blog:${BUILD_TAG} $infraFolder/"
+            sh "docker build -t mugithi/blog:${BUILD_TAG} $appFolder/"
             withCredentials([[$class: 'UsernamePasswordMultiBinding',
        // set the dockerhub credentials
             credentialsId: 'github',
