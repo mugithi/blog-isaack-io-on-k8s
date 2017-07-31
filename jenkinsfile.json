@@ -1,0 +1,14 @@
+{
+  "globals": {
+    "jenkinsServer": "jenkins",
+    "globalDNS": "k8s.executiveglobalsolutions.com."
+  },
+  "app01": {
+    "name": "wordpress",
+    "globalDNS": "k8s.executiveglobalsolutions.com.",
+    "repo": "https://github.com/mugithi/executive-global-solutions.git",
+    "repoCreds": "github",
+    "appFolder": "./wordpress-templ-k8s",
+    "region": "us-east-1"
+  }
+}

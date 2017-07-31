@@ -1,0 +1,40 @@
+
+---
+kind: Deployment
+apiVersion: extensions/v1beta1
+metadata:
+  name: blog-io
+  labels:
+    k8s-addon: ingress-nginx.addons.k8s.io
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        k8s-addon: ingress-nginx.addons.k8s.io
+        app: blog-io
+    spec:
+      terminationGracePeriodSeconds: 60
+      containers:
+      - name: blog-io
+        image: index.docker.io/mugithi/blog:latest
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 4000
+            scheme: HTTP
+          initialDelaySeconds: 30
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: 10m
+            memory: 20Mi
+          requests:
+            cpu: 10m
+            memory: 20Mi
+        ports:
+        - name: http
+          containerPort: 4000
+          protocol: TCP
+      imagePullSecrets:
+      - name: myregistrykey

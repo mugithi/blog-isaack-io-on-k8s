@@ -1,0 +1,5 @@
+terraform.tfstate
+terraform.tfstate.*
+secret*
+.db_data
+.wordpress_files
