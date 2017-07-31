@@ -52,6 +52,21 @@ podTemplate(label: 'pipeline', containers: [
           }
         }
 
+        stage ('build website and push to dockerhub') {
+          container('docker') {
+            println "building container and pusing to dockerhub"
+            withCredentials([[$class: 'UsernamePasswordMultiBinding',
+       // set the dockerhub credentials
+            credentialsId: 'dockerhub',
+            passwordVariable: 'DOCKER_PASSWORD',
+            usernameVariable: 'DOCKER_USERNAME']]) {
+                sh '''sudo docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} -e isackaranja@gmail.com
+                      sudo docker push mugithi/blog:${BUILD_TAG}'''
+                    }
+                }
+            
+        }
+
         if (env.BRANCH_NAME == 'master') {
             def appGlobalDNS = configVars.app01.globalDNS
             def appDNS = configVars.app01.name+"."+appGlobalDNS
@@ -99,8 +114,8 @@ podTemplate(label: 'pipeline', containers: [
                 ////////////////////////////////////////////////////////////////////////////////
                 container ('helm' ) {
                     println "Starting the install of the helm chart"
-                    sh "helm upgrade --install ${BRANCH_NAME} $appFolder"
-                    println "Show the output of the helm install"
+                    sh "helm upgrade --install ${BRANCH_NAME} $appFolder --set image.tag=$BUILD_TAG"
+           
                 }
                 ////////////////////////////////////////////////////////////////////////////////
                 // Print the kubenernetes status 
@@ -170,7 +185,7 @@ podTemplate(label: 'pipeline', containers: [
                 // Create container chart that using HELM
                 ////////////////////////////////////////////////////////////////////////////////////
                 println "Starting the install of the helm chart"
-                sh "helm upgrade --install --set ingress.hosts=$nodotappDNS $branchName $appFolder "
+                sh "helm upgrade --install --set ingress.hosts=$nodotappDNS $branchName $appFolder --set image.tag=$BUILD_TAG"
                 println "Show the output of the helm install"
                 }
 
