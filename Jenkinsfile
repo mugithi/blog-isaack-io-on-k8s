@@ -11,6 +11,7 @@ podTemplate(label: 'pipeline', containers: [
 
   // Docker Containers that will be used, terraform - awscli - helm
   containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl', ttyEnabled: true, command: 'cat' ),
+  containerTemplate(name: 'docker', image: 'docker:1.12.6', command: 'cat', ttyEnabled: true),
   containerTemplate(name: 'terraform-aws', image: 'mugithi/terraform-awscli', ttyEnabled: true, command: 'cat' ),
   containerTemplate(name: 'helm', image: 'mugithi/helm', ttyEnabled: true, command: 'cat')],
    volumes: [hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')]) {

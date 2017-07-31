@@ -4,11 +4,11 @@
     "globalDNS": "k8s.executiveglobalsolutions.com."
   },
   "app01": {
-    "name": "wordpress",
-    "globalDNS": "k8s.executiveglobalsolutions.com.",
-    "repo": "https://github.com/mugithi/executive-global-solutions.git",
+    "name": "blog-isaack-io",
+    "globalDNS": "isaack.io.",
+    "repo": "https://github.com/mugithi/blog-isaack-io-on-k8s.git",
     "repoCreds": "github",
-    "appFolder": "./wordpress-templ-k8s",
+    "appFolder": "./isaack-io",
     "region": "us-east-1"
   }
 }
