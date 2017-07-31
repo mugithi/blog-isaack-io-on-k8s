@@ -4,7 +4,7 @@
     "globalDNS": "k8s.executiveglobalsolutions.com."
   },
   "app01": {
-    "name": "blog-isaack-io",
+    "name": "blog",
     "globalDNS": "isaack.io.",
     "repo": "https://github.com/mugithi/blog-isaack-io-on-k8s.git",
     "repoCreds": "github",
