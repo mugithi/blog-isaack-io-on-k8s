@@ -59,6 +59,10 @@ podTemplate(label: 'pipeline', containers: [
 
             stage ('create chart dns entry' ) {
               container('terraform-aws') {
+
+                ////////////////////////////////////////////////////////////////////////////////
+                // Retrieve using AWSCLI GLOBALDNSZONEID, ELBDNS, ELBDNSHOSTID  them in VARIABLE
+                ////////////////////////////////////////////////////////////////////////////////
                 println "awscli: retrieve ELB DNS hostid and store it in variable"
                 sh "ls -al"
                 def hostzoneid = sh(script: " aws route53 list-hosted-zones --query HostedZones[?Name==\\`$globalDNS\\`].Id --output text ", returnStdout: true).trim()
@@ -67,14 +71,19 @@ podTemplate(label: 'pipeline', containers: [
                 def zoneid = zoneidlist[2]
                 def elbdns = sh(returnStdout: true, script: " aws route53 list-resource-record-sets --hosted-zone-id $zoneid --query ResourceRecordSets[?Name==\\`$jenkinsDNS\\`].AliasTarget[].DNSName --output text").trim()
                 def elbhostid = sh(returnStdout: true, script: " aws route53 list-resource-record-sets --hosted-zone-id $zoneid --query ResourceRecordSets[?Name==\\`$jenkinsDNS\\`].AliasTarget[].HostedZoneId --output text  ").trim()
-                
+
+                ////////////////////////////////////////////////////////////////////////////////
+                // Retrieve using AWSCLI GLOBALAPPDNSZONEID and storage them in VARIABLE
+                ////////////////////////////////////////////////////////////////////////////////
                 println "awscli: retrieve APP DNS hostid and store it in variable"
                 def apphostzoneid = sh(returnStdout: true, script: " aws route53 list-hosted-zones --query HostedZones[?Name==\\`$appGlobalDNS\\`].Id --output text ").trim()
                 String[] appzoneidlist
                 appzoneidlist = apphostzoneid.split('/')
                 def appzoneid = appzoneidlist[2]
 
-
+                ////////////////////////////////////////////////////////////////////////////////
+                // Create DNS entries using Terraform 
+                ////////////////////////////////////////////////////////////////////////////////
                 println "terraform: perform terraform apply"
                 sh( returnStdout: true, script: "terraform plan -var elb_name=$elbdns -var zone_id=$appzoneid -var zone_name=$appDNS -var elb_zone_id=$elbhostid -var region=$awsRegion  --input=false")
                 println "terraform: perform terraform apply"
@@ -83,12 +92,19 @@ podTemplate(label: 'pipeline', containers: [
               }
 
             }
+            
             stage ('install helm chart') {
+                ////////////////////////////////////////////////////////////////////////////////
+                // Install HELM chart 
+                ////////////////////////////////////////////////////////////////////////////////
                 container ('helm' ) {
                     println "Starting the install of the helm chart"
                     sh "helm upgrade --install ${BRANCH_NAME} $appFolder"
                     println "Show the output of the helm install"
                 }
+                ////////////////////////////////////////////////////////////////////////////////
+                // Print the kubenernetes status 
+                ////////////////////////////////////////////////////////////////////////////////
                 container('kubectl') {
                   println "print the container environment"
                   sh "kubectl describe ing"
@@ -97,24 +113,37 @@ podTemplate(label: 'pipeline', containers: [
         }
 
         if (env.BRANCH_NAME =~ "PR-*" ) {
+
+            /////////////////////////////////////////////////////////////////////////////////////
+            // Store the Variables from Jsonfile
+            /////////////////////////////////////////////////////////////////////////////////////
             def branchName = env.BRANCH_NAME.toLowerCase()
             def appGlobalDNS = configVars.app01.globalDNS
             def appDNS = configVars.app01.name+"-"+branchName+"."+appGlobalDNS
             String nodotappDNS = appDNS[0..-2]
             def awsRegion = configVars.app01.region
+            
 
+            /////////////////////////////////////////////////////////////////////////////////////
+            // Create chart DNS entry
+            /////////////////////////////////////////////////////////////////////////////////////
             stage ('create chart dns entry' ) {
               container('terraform-aws') {
-                //cleanup old DNS entries
-                println "awscli: retrieve DNS hostid and store it in variable"
+
+                /////////////////////////////////////////////////////////////////////////////////
+                // Retrieve using AWSCLI GLOBALDNSZONEID, ELBDNS, ELBDNSHOSTID  them in VARIABLE
+                /////////////////////////////////////////////////////////////////////////////////
+                println "awscli: retrieve DNS hostid and store it in variable(s)"
                 def hostzoneid = sh(script: " aws route53 list-hosted-zones --query HostedZones[?Name==\\`$globalDNS\\`].Id --output text ", returnStdout: true).trim()
                 String[] zoneidlist
                 zoneidlist = hostzoneid.split('/')
                 def zoneid = zoneidlist[2]
-                def elbdns = sh(returnStdout: true, script: " aws route53 list-resource-record-sets --hosted-zone-id $zoneid --query ResourceRecordSets[?Name==\\`$jenkinsDNS\\`].AliasTarget[].DNSName --output text").trim()
-                print elbdns
-                def elbhostid = sh(returnStdout: true, script: " aws route53 list-resource-record-sets --hosted-zone-id $zoneid --query ResourceRecordSets[?Name==\\`$appGlobalDNS\\`].AliasTarget[].HostedZoneId --output text  ").trim()
-                print elbhostid 
+                def elbdns = sh(returnStdout: true, script: " aws route53 list-resource-record-sets --hosted-zone-id $zoneid --query ResourceRecordSets[?Name==\\`$jenkinsDNS\\`].AliasTarget[].DNSName --output text").trim()   
+                def elbhostid = sh(returnStdout: true, script: " aws route53 list-resource-record-sets --hosted-zone-id $zoneid --query ResourceRecordSets[?Name==\\`$jenkinsDNS\\`].AliasTarget[].HostedZoneId --output text  ").trim()
+                
+                
+                ////////////////////////////////////////////////////////////////////////////////////
+                // 
                 println "terraform: perform terraform plan"
                 // ENABLE DEBUG MODE "export TF_LOG=TRACE && ""
                 sh( returnStdout: true, script: "terraform plan -var elb_name=$elbdns -var zone_id=$zoneid -var zone_name=$appDNS -var elb_zone_id=$elbhostid -var region=$awsRegion  --input=false")
