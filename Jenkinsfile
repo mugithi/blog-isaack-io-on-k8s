@@ -33,6 +33,7 @@ podTemplate(label: 'pipeline', containers: [
         def jenkinsDNS = configVars.globals.jenkinsServer+"."+configVars.globals.globalDNS
         def infraFolder = configVars.app01.infraFolder
         def appFolder = configVars.app01.appFolder
+        def repoCreds = configVars.app01.repoCreds
 
         //Tests - initialize helm
         stage ('init helm') {
@@ -61,10 +62,11 @@ podTemplate(label: 'pipeline', containers: [
             sh "docker build -t mugithi/blog:${BUILD_TAG} $appFolder/"
             withCredentials([[$class: 'UsernamePasswordMultiBinding',
        // set the dockerhub credentials
-            credentialsId: 'github',
+            credentialsId: repoCreds,
             passwordVariable: 'DOCKER_PASSWORD',
             usernameVariable: 'DOCKER_USERNAME']]) {
-                     sh( returnStdout: true, script: "echo $DOCKER_USERNAME && echo $DOCKER_PASSWORD && echo $BUILD_TAG")
+                     sh "docker login -e isackaranja@gmail.com -u ${env.DOCKER_USERNAME} -p ${env.DOCKER_PASSWORD}"
+                     sh "docker push mugithi/blog:${BUILD_TAG}"
                     }
                 }
 
