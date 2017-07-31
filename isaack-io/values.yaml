@@ -16,7 +16,7 @@ service:
 ingress:
   enabled: true
   # Used to create Ingress record (should used with service.type: ClusterIP).
-  hosts: blog.k8s.executiveglobalsolutions.com
+  hosts: blog.isaack.io
   annotations:
     ingress.kubernetes.io/ssl-redirect: "true"
     kubernetes.io/ingress.class: nginx
