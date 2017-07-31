@@ -57,7 +57,7 @@ podTemplate(label: 'pipeline', containers: [
             println "building container and pusing to dockerhub"
             withCredentials([[$class: 'UsernamePasswordMultiBinding',
        // set the dockerhub credentials
-            credentialsId: 'dockerhub',
+            credentialsId: 'github',
             passwordVariable: 'DOCKER_PASSWORD',
             usernameVariable: 'DOCKER_USERNAME']]) {
                 sh '''sudo docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} -e isackaranja@gmail.com
