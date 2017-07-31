@@ -54,7 +54,10 @@ podTemplate(label: 'pipeline', containers: [
 
         stage ('build website and push to dockerhub') {
           container('docker') {
-            println "building container and pusing to dockerhub"
+            println "pulling content from github"
+            git credentialsId: 'github',
+                url: 'https://github.com/mugithi/blog.git'
+            
             sh "ls -al"
             sh "docker build -t mugithi/blog:${BUILD_TAG} ."
             withCredentials([[$class: 'UsernamePasswordMultiBinding',
