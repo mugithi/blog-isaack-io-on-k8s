@@ -6,7 +6,7 @@ image:
   repository: mugithi/blog
   tag: jenkins-blog-isaack-io-master-47
   registry: index.docker.io
-  registrysecrets: docker-registry
+  registrysecrets: myregistrykey
   pullPolicy: IfNotPresent
 service:
   name: isaack-io
