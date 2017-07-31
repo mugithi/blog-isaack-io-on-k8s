@@ -143,7 +143,8 @@ podTemplate(label: 'pipeline', containers: [
                 
                 
                 ////////////////////////////////////////////////////////////////////////////////////
-                // 
+                // Create AWS DNS entries using terraform 
+                ////////////////////////////////////////////////////////////////////////////////////
                 println "terraform: perform terraform plan"
                 // ENABLE DEBUG MODE "export TF_LOG=TRACE && ""
                 sh( returnStdout: true, script: "terraform plan -var elb_name=$elbdns -var zone_id=$zoneid -var zone_name=$appDNS -var elb_zone_id=$elbhostid -var region=$awsRegion  --input=false")
@@ -155,30 +156,44 @@ podTemplate(label: 'pipeline', containers: [
 
             stage ('install helm chart') {
               container ('helm' ) {
-                // clean up all charts
-                // println "Delete old PRs"
-                // sh "helm delete --namespace=pull-request-$app01.name"
+                ////////////////////////////////////////////////////////////////////////////////////
+                // Create container chart that using HELM
+                ////////////////////////////////////////////////////////////////////////////////////
                 println "Starting the install of the helm chart"
                 sh "helm upgrade --install --set ingress.hosts=$nodotappDNS $branchName $appFolder "
                 println "Show the output of the helm install"
                 }
+
+                ////////////////////////////////////////////////////////////////////////////////////
+                // Pring the current Kubernetes envrioment 
+                ////////////////////////////////////////////////////////////////////////////////////
                 container('kubectl') {
                   println "print the container environment"
                   sh "kubectl describe ing"
                 }
             }
             stage ('clean up charts and DNS entries') {
-              //Send user prompt with yes/no prompt on whether you can push site to production
+              ////////////////////////////////////////////////////////////////////////////////////
+              // User Prompt to check whether they are ready to clean up PR environment 
+              ////////////////////////////////////////////////////////////////////////////////////
               def userInput = input id: 'Promote', message: 'Are you ready to Clean up this deployment and delete DNS and Helm Files?', parameters: [choice(choices: 'Yes\nNo', description: '', name: 'answer')]
               echo ("Answer: ${userInput}")
 
-              //If yes push to production
+              ////////////////////////////////////////////////////////////////////////////////////
+              // If answer is yes,
+              ////////////////////////////////////////////////////////////////////////////////////
 
               if (userInput == "Yes") {
+                ////////////////////////////////////////////////////////////////////////////////////
+                // Clean up Helm Chart 
+                ////////////////////////////////////////////////////////////////////////////////////
                 container ('helm' ) {
                   println "Starting cleanup of the Helm Chart"
                   sh "helm delete $branchName "
                   }
+                ///////////////////////////////////////////////////////////////////////////////////
+                // Clean up DNS entrie using Helm chart
+                ////////////////////////////////////////////////////////////////////////////////////  
                 container('terraform-aws') {
                   println "awscli: retrieve DNS hostid and store it in variable"
                   def hostzoneid = sh(script: " aws route53 list-hosted-zones --query HostedZones[?Name==\\`$globalDNS\\`].Id --output text ", returnStdout: true).trim()
