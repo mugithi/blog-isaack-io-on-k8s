@@ -60,8 +60,8 @@ podTemplate(label: 'pipeline', containers: [
             credentialsId: 'github',
             passwordVariable: 'DOCKER_PASSWORD',
             usernameVariable: 'DOCKER_USERNAME']]) {
-                sh '''sudo docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} -e isackaranja@gmail.com
-                      sudo docker push mugithi/blog:${BUILD_TAG}'''
+                sh '''docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} -e isackaranja@gmail.com
+                      docker push mugithi/blog:${BUILD_TAG}'''
                     }
                 }
             
