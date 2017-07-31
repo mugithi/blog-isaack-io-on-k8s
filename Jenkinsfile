@@ -55,6 +55,7 @@ podTemplate(label: 'pipeline', containers: [
         stage ('build website and push to dockerhub') {
           container('docker') {
             println "building container and pusing to dockerhub"
+            sh "docker build -t mugithi/blog:${BUILD_TAG} ."
             withCredentials([[$class: 'UsernamePasswordMultiBinding',
        // set the dockerhub credentials
             credentialsId: 'github',
