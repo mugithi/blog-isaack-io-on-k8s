@@ -104,10 +104,11 @@ podTemplate(label: 'pipeline', containers: [
                 def elbdns = sh(returnStdout: true, script: " aws route53 list-resource-record-sets --hosted-zone-id $zoneid --query ResourceRecordSets[?Name==\\`$jenkinsDNS\\`].AliasTarget[].DNSName --output text").trim()
                 def elbhostid = sh(returnStdout: true, script: " aws route53 list-resource-record-sets --hosted-zone-id $zoneid --query ResourceRecordSets[?Name==\\`$jenkinsDNS\\`].AliasTarget[].HostedZoneId --output text  ").trim()
 
-                println "terraform: perform terraform apply"
+                println "terraform: perform terraform plan"
                 // ENABLE DEBUG MODE "export TF_LOG=TRACE && ""
                 sh( returnStdout: true, script: "terraform plan -var elb_name=$elbdns -var zone_id=$zoneid -var zone_name=$appDNS -var elb_zone_id=$elbhostid -var region=$awsRegion  --input=false")
-                sh( returnStdout: true, script: "terraform apply -var zone_id=$zoneid -var zone_name=$appDNS  -var elb_zone_id=$elbhostid -var region=$awsRegion -var elb_name=$elbdns  --input=false")
+                println "terraform: perform terraform apply"
+                sh( returnStdout: true, script: "terraform apply -var elb_name=$elbdns -var zone_id=$zoneid -var zone_name=$appDNS -var elb_zone_id=$elbhostid -var region=$awsRegion  --input=false")
                 println "Navigate to this URL to access the website: https://" + appDNS
               }
             }
