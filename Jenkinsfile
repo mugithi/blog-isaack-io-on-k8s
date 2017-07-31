@@ -59,17 +59,24 @@ podTemplate(label: 'pipeline', containers: [
 
             stage ('create chart dns entry' ) {
               container('terraform-aws') {
-                println "awscli: retrieve DNS hostid and store it in variable"
+                println "awscli: retrieve ELB DNS hostid and store it in variable"
                 def hostzoneid = sh(script: " aws route53 list-hosted-zones --query HostedZones[?Name==\\`$globalDNS\\`].Id --output text ", returnStdout: true).trim()
                 String[] zoneidlist
                 zoneidlist = hostzoneid.split('/')
                 def zoneid = zoneidlist[2]
                 def elbdns = sh(returnStdout: true, script: " aws route53 list-resource-record-sets --hosted-zone-id $zoneid --query ResourceRecordSets[?Name==\\`$jenkinsDNS\\`].AliasTarget[].DNSName --output text").trim()
-                def elbhostid = sh(returnStdout: true, script: " aws route53 list-resource-record-sets --hosted-zone-id $zoneid --query ResourceRecordSets[?Name==\\`$appGlobalDNS\\`].AliasTarget[].HostedZoneId --output text  ").trim()
+                def elbhostid = sh(returnStdout: true, script: " aws route53 list-resource-record-sets --hosted-zone-id $zoneid --query ResourceRecordSets[?Name==\\`$jenkinsDNS\\`].AliasTarget[].HostedZoneId --output text  ").trim()
+                
+                println "awscli: retrieve APP DNS hostid and store it in variable"
+                def apphostzoneid = sh(script: " aws route53 list-hosted-zones --query HostedZones[?Name==\\`$globalDNS\\`].Id --output text ", returnStdout: true).trim()
+                String[] appzoneidlist
+                appzoneidlist = apphostzoneid.split('/')
+                def appzoneid = appzoneidlist[2]
+
 
                 println "terraform: perform terraform apply"
-                sh( returnStdout: true, script: "terraform plan -var elb_name=$elbdns -var zone_id=$zoneid -var zone_name=$appDNS -var elb_zone_id=$elbhostid -var region=$awsRegion  --input=false")
-                sh( returnStdout: true, script: "terraform apply -var zone_id=$zoneid -var zone_name=$appDNS  -var elb_zone_id=$elbhostid -var region=$awsRegion -var elb_name=$elbdns  --input=false")
+                sh( returnStdout: true, script: "terraform plan -var elb_name=$elbdns -var zone_id=$appzoneid -var zone_name=$appDNS -var elb_zone_id=$elbhostid -var region=$awsRegion  --input=false")
+                sh( returnStdout: true, script: "terraform apply -var elb_name=$elbdns -var zone_id=$appzoneid -var zone_name=$appDNS -var elb_zone_id=$elbhostid -var region=$awsRegion  --input=false")
                 println "Navigate to this URL to access the website: https://" + appDNS
               }
 
