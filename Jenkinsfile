@@ -60,6 +60,7 @@ podTemplate(label: 'pipeline', containers: [
             stage ('create chart dns entry' ) {
               container('terraform-aws') {
                 println "awscli: retrieve ELB DNS hostid and store it in variable"
+                sh "ls -al"
                 def hostzoneid = sh(script: " aws route53 list-hosted-zones --query HostedZones[?Name==\\`$globalDNS\\`].Id --output text ", returnStdout: true).trim()
                 String[] zoneidlist
                 zoneidlist = hostzoneid.split('/')
@@ -68,7 +69,7 @@ podTemplate(label: 'pipeline', containers: [
                 def elbhostid = sh(returnStdout: true, script: " aws route53 list-resource-record-sets --hosted-zone-id $zoneid --query ResourceRecordSets[?Name==\\`$jenkinsDNS\\`].AliasTarget[].HostedZoneId --output text  ").trim()
                 
                 println "awscli: retrieve APP DNS hostid and store it in variable"
-                def apphostzoneid = sh(script: " aws route53 list-hosted-zones --query HostedZones[?Name==\\`$globalDNS\\`].Id --output text ", returnStdout: true).trim()
+                def apphostzoneid = sh(returnStdout: true, script: " aws route53 list-hosted-zones --query HostedZones[?Name==\\`$globalDNS\\`].Id --output text ").trim()
                 String[] appzoneidlist
                 appzoneidlist = apphostzoneid.split('/')
                 def appzoneid = appzoneidlist[2]
