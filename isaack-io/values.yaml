@@ -4,10 +4,10 @@
 replicaCount: 1
 image:
   repository: mugithi/blog
-  tag: jenkins-blog-isaack-io-master-47
+  tag: latest
   registry: index.docker.io
   registrysecrets: myregistrykey
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 service:
   name: isaack-io
   type: ClusterIP
