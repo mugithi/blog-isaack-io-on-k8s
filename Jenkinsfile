@@ -102,7 +102,7 @@ s
                 ////////////////////////////////////////////////////////////////////////////////
                 // Create DNS entries using Terraform
                 ////////////////////////////////////////////////////////////////////////////////
-                println "terraform: perform terraform apply"
+                println "terraform: perform terraform plan"
                 sh( returnStdout: true, script: "terraform plan -var elb_name=$elbdns -var zone_id=$appzoneid -var zone_name=$appDNS -var elb_zone_id=$elbhostid -var region=$awsRegion  --input=false")
                 println "terraform: perform terraform apply"
                 sh( returnStdout: true, script: "terraform apply -var elb_name=$elbdns -var zone_id=$appzoneid -var zone_name=$appDNS -var elb_zone_id=$elbhostid -var region=$awsRegion  --input=false")
