@@ -65,7 +65,7 @@ podTemplate(label: 'pipeline', containers: [
             credentialsId: repoCreds,
             passwordVariable: 'DOCKER_PASSWORD',
             usernameVariable: 'DOCKER_USERNAME']]) {
-                     sh "docker login 'mugithi' -p 'Western!101' "
+                     sh "docker login -u 'mugithi' -p 'Western!101' "
                     //  sh "docker login  -u ${env.DOCKER_USERNAME} -p ${env.DOCKER_PASSWORD} https://index.docker.io/v1/"
                      sh "docker push mugithi/blog:${BUILD_TAG}"
                     }
