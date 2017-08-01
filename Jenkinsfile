@@ -34,6 +34,7 @@ podTemplate(label: 'pipeline', containers: [
         def infraFolder = configVars.app01.infraFolder
         def appFolder = configVars.app01.appFolder
         def repoCreds = configVars.app01.repoCreds
+        def dockerRegistryCreds = configVars.app01.dockerRegistryCreds
 
         //Tests - initialize helm
         stage ('init helm') {
@@ -56,8 +57,8 @@ podTemplate(label: 'pipeline', containers: [
 
         stage ('build website and push to dockerhub') {
 
-            println "build container and push to dockerhub using credentials $configVars.app01.dockerRegistryCreds"
-            withCredentials([usernamePassword(credentialsId: configVars.app.dockerRegistryCreds, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+            println "build container and push to dockerhub using credentials $dockerRegistryCreds"
+            withCredentials([usernamePassword(credentialsId: dockerRegistryCreds, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
             container('docker') {
 
               sh "ls -al"
