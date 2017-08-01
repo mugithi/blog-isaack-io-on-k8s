@@ -68,7 +68,7 @@ podTemplate(label: 'pipeline', containers: [
             passwordVariable: 'PASSWORD',
             usernameVariable: 'USERNAME']]) {
               container('docker') {
-                     sh "docker login -u $USERNAME -p $PASSWORD https://index.docker.io/v1"
+                     sh "docker login -u $USERNAME -p $PASSWORD"
                      sh "echo $USERNAME"
                      sh "echo $PASSWORD"
                     //  sh "docker login  -u ${env.DOCKER_USERNAME} -p ${env.DOCKER_PASSWORD} https://index.docker.io/v1/"
