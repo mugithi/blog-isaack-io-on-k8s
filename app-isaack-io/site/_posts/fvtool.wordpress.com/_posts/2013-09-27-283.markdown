@@ -1,0 +1,106 @@
+---
+author: mugithi
+comments: true
+date: 2013-09-27 21:57:38+00:00
+layout: post
+#link: https://fvtool.wordpress.com/2013/09/27/283/
+slug: '283'
+title: Puppet - Creating a custom Module
+wordpress_id: 283
+---
+
+So, I wanted to create a custom module for Puppet. Before I did that, I first setup three things. 
+
+
+
+	
+  1. Installed puppet and puppet client on to CentOS servers
+
+    
+  2. Installed Configured the web server to serve out the /etc/puppet/ through http 
+
+
+
+
+I created custom NTP module that will turn ntp services on on the puppet client ntp and replace the ntp.conf with a file using a file sitting on puppet master web server.
+
+Under /etc/puppet/modules/ntp/manifests/init.pp I created the following file
+
+
+    
+    <code># /etc/puppet/modules/ntp/manifests/init.pp
+    
+       class ntp {
+          case $operatingsystem {
+            centos, redhat: {
+              $service_name = 'ntpd'
+              $conf_file    = 'ntp.conf.el'
+            }
+            debian, ubuntu: {
+              $service_name = 'ntp'
+              $conf_file    = 'ntp.conf.debian'
+            }
+          }
+    
+          package { 'ntp':
+            ensure => installed,
+          }
+          file { 'ntp.conf':
+            path    => '/etc/ntp.conf',
+            ensure  => file,
+            require => Package['ntp'],
+           <font color="#FF0000"> source  => "puppet:///modules/ntp/${conf_file}"</font>
+          }
+          service { 'ntp':
+            name      => $service_name,
+            ensure    => running,
+            enable    => true,
+            subscribe => File['ntp.conf'],
+          }
+        }
+    
+    include ntp</code>
+
+
+
+To enable the module and allow puppet to apply it on my client, I added the following snippet to my site.pp file. My client was called puppy-client.dasherdemo.com
+
+
+    
+    <code>[root@hq-demo-puppet /]# cat /etc/puppet/manifests/site.pp
+    node 'puppet-client.dasherdemo.com' {
+    
+          include ntp
+        }
+    </code>
+
+
+
+In my web server, I created a file called puppetshare.conf in the folder /etc/httpd/conf.d. This shared the folder /etc/puppet out using http.
+
+
+    
+    <code>[root@hq-demo-puppet ~]# cat /etc/httpd/conf.d/puppetshare.conf
+    PassengerHighPerformance On
+    # Set this to about 1.5 times the number of CPU cores in your master:
+    PassengerMaxPoolSize 6
+    # Recycle master processes after they service 1000 requests
+    PassengerMaxRequests 1000
+    # Stop processes if they sit idle for 10 minutes
+    PassengerPoolIdleTime 600
+    
+    Listen 80
+    
+        <font color="#FF0000">DocumentRoot /etc/puppet/</font>
+        
+            Options Indexes FollowSymLinks Includes ExecCGI
+            AllowOverride All
+            Order Deny,Allow
+            Allow from All
+        
+    
+    </code>
+
+
+
+To source a URL as the source of a file in a puppet file, you use the "puppet:///" path. By default unless changed, if you use the code snippet "puppet:///modules/ntp/ntp.conf, it will look for the file at the following path, /etc/puppet/modules/ntp/files/ntp.conf broken as "puppet:///modules/module_name/file_name" translating to "/etc/puppet/modules/module_name/files/file_name"

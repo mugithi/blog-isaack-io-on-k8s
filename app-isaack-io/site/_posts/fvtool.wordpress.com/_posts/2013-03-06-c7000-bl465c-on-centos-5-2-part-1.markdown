@@ -1,0 +1,185 @@
+---
+author: mugithi
+comments: true
+date: 2013-03-06 10:30:42+00:00
+layout: post
+#link: https://fvtool.wordpress.com/2013/03/06/c7000-bl465c-on-centos-5-2-part-1/
+slug: c7000-bl465c-on-centos-5-2-part-1
+title: C7000 BL465c on Centos 5.2 Part 1
+wordpress_id: 194
+tags:
+- cdrom yum repository
+- Centos
+- compile
+- initrd
+- kernel
+- nic drivers
+---
+
+I recently had a very interesting experience where a customer building a new DC bought ~$800K dollars of HP C7000 blades with Gen8 BL465c AMD processors from us.  Soon after placing the order, they realized that their application has only been certified to run on the 2.6.18-92.el5 kernel. The HP Gen8 BL465 blades were only supported from Centos 5.7. A few emails later, we realized this was going to be a big problem. CentOS 5.2 did not have problem running on the Gen8 platform, but we were missing the network drivers which the customer needed especially since he was doing PXE boot installation across the environment. They were in danger of them canceling the order because it was possible that the C7000 Gen8 Blade platform was not going to meet their business needs.
+
+We had two options
+
+
+
+	
+  * Backport the network driver from CentOS 6 to the CentOS 5.2 PXE kernel.
+
+  * Shift their platform to CentOS 6.x on the new servers (This was not optimal because the customer would not have had enough time to test their application against the  2.6.18-274 kernel (Centos 5.7) and still meet their release timeline. 
+
+
+
+
+So we started going down the path to get the HP drivers back ported to Centos 5.2. The Gen8 BL465c shipped with the Flex-10 10Gb 2P 530FLB LOM. I needed to get the drivers working on that card. I downloaded the HP drivers from this ftp site ftp://ftp.hp.com/pub/softlib2/software1/pubsw-linux/p1554726448/. I downloaded the version v79716 which was released on Oct 2012. From the release notes of this driver, the driver had only been tested on the Centos 5.6 kernel, so even starting I was doubtful whether it would compile successfully against the 64bit Centos 5.2 I was running. 
+
+If first started setting up the environment to support rpm-build. I needed to install several packages,
+redhat-rpm-config package
+kernel-devel package
+kernel-xen-devel package
+
+I also needed the make package,rpm-build package and the gcc library since I had installed the CentOS barebones. I was using ILO so had mounted the ISO image to the server and I found that the RPMs I needed located at this location /CentOS
+
+
+    
+    <code>[root@localhost CentOS]# mkdir /mnt/cdrom
+    [root@localhost CentOS]# mount /dev/cdrom /mnt/cdrom/
+    mount: block device /dev/cdrom is write-protected, mounting read-only
+    [root@localhost CentOS]ls /mnt/cdrom/CentOS/
+    </code>
+
+
+
+Unfortunately, some of the packages I needed had quite a number of dependancies and using rpm -ivh to instal dependancies was going to be quite a pain
+
+
+    
+    <code>[root@localhost CentOS]# rpm -ivh rpm-build-4.4.2-48.el5.x86_64.rpm
+    error: Failed dependencies:
+    	elfutils is needed by rpm-build-4.4.2-48.el5.x86_64
+    [root@localhost CentOS]# rpm -ivh elfutils-0.125-3.el5.x86_64.rpm
+    error: Failed dependencies:
+    	elfutils-libs = 0.125-3.el5 is needed by elfutils-0.125-3.el5.x86_64
+    	libdw.so.1()(64bit) is needed by elfutils-0.125-3.el5.x86_64
+    	libdw.so.1(ELFUTILS_0.122)(64bit) is needed by elfutils-0.125-3.el5.x86_64
+    </code>
+
+
+
+I decided to setup a local iso repository so that I could use yum to ease the install process. I first create a entry in /etc/yum.repos.d/
+
+
+    
+    <code>[root@localhost CentOS]# cat /etc/yum.repos.d/CDROM-local-mount.repo
+    [My CDROM Repository]
+    name=my cdrom repository
+    baseurl=file:///mnt/
+    enabled=1</code>
+
+
+
+I then used createrepo to generate the repository xml files in the /mnt directory. I did not have createrepo installed so i first installed that from the CD using rpm -ivh
+
+
+    
+    <code>root@localhost CentOS]# rpm -ivh createrepo-0.4.11-3.el5.noarch.rpm
+    Preparing...                ########################################### [100%]
+       1:createrepo             ########################################### [100%]
+    [root@localhost CentOS]# cd /mnt/
+    [root@localhost mnt]# createrepo .</code>
+
+
+
+The createrepo generates about 3000 entries in the xml files and it took about 15 mins for the repository creation to complete.
+
+The last step to create the CDROM repository was to remove the other entries in /etc/yum.repos.d/ and clean the repository
+
+
+    
+    <code>[root@localhost yum.repos.d]# rm -f  /etc/yum.repos.d/CentOS-*
+    [root@localhost yum.repos.d]# yum clean all</code>
+
+
+
+I then installed gcc, redhat-rpm-config package, kernel-devel package, kernel-xen-devel package, rpm-build and make packages using yum from the mounted CDROM. 
+
+
+    
+    <code>root@localhost CentOS]# yum install rpm-build kernel-devel kernel-xen-devel redhat-rpm-config gcc make
+    My CDROM Repository       100% |=========================|  951 B    00:00
+    primary.xml.gz            100% |=========================| 797 kB    00:00
+    My CDROM R: ################################################## 3222/3222
+    base                      100% |=========================| 1.1 kB    00:00
+    updates                   100% |=========================| 1.9 kB    00:00
+    addons                    100% |=========================| 1.9 kB    00:00
+    extras                    100% |=========================| 2.1 kB    00:00</code>
+
+
+
+I used a ILO mount a usb stick that had the driver source rpm hp-netxtreme2-7.4.25-2.src.rpm that I downloaded from the ftp site. To mount the FAT formatted usb stick on CentOS, you need to use the -t auto command otherwise you get "unknown filesystem" error
+
+
+    
+    <code>[root@localhost ~]# fdisk -l
+    Disk /dev/cciss/c0d0: 146.7 GB, 146778685440 bytes
+    255 heads, 63 sectors/track, 17844 cylinders
+    Units = cylinders of 16065 * 512 = 8225280 bytes
+    
+               Device Boot      Start         End      Blocks   Id  System
+    /dev/cciss/c0d0p1   *           1          13      104391   83  Linux
+    /dev/cciss/c0d0p2              14       17844   143227507+  8e  Linux LVM
+    
+    Disk /dev/sda: 2089 MB, 2089221120 bytes
+    65 heads, 62 sectors/track, 1012 cylinders
+    Units = cylinders of 4030 * 512 = 2063360 bytes
+    
+       Device Boot      Start         End      Blocks   Id  System
+    <font color="#FF0000">/dev/sda1               1        1012     2039149    6  FAT16 < USB STICK <</font> 
+    [root@localhost ~]# mkdir /mnt/usb
+    [root@localhost ~]# mount -t auto /dev/sda1 /mnt/usb/
+    [root@localhost ~]# df -kh
+    Filesystem            Size  Used Avail Use% Mounted on
+    /dev/mapper/VolGroup00-LogVol00
+                          131G  1.5G  123G   2% /
+    /dev/cciss/c0d0p1      99M   12M   82M  13% /boot
+    tmpfs                  63G     0   63G   0% /dev/shm
+    /dev/scd0             4.3G  4.3G     0 100% /mnt/cdrom
+    /dev/sda1             2.0G  6.8M  2.0G   1% /mnt/usb</code>
+
+
+
+I now had everything. I copied the driver to a local directory and installed the source rpm package and this created a spec file in the SPECS directory. To successfully install the src.rpm on a CentOS system, you first have to create the /usr/src/redhat/SOURCES path otherwise you get an error.
+
+
+    
+    <code>[root@localhost CentOS]# cp /mnt/usb/hp-netxtreme2-7.4.25-2.src.rpm /root/RPMSRC/
+    [root@localhost CentOS]# cd /root/RPMSRC/
+    [root@localhost RPMSRC]# rpm -ivh hp-netxtreme2-7.4.25-2.src.rpm
+    [root@localhost RPMSRC]# error: cannot create %sourcedir /usr/src/redhat/SOURCES
+    [root@localhost CentOS]# mkdir -p /usr/src/redhat/SOURCES
+    [root@localhost RPMSRC]# rpm -ivh hp-netxtreme2-7.4.25-2.src.rpm
+       1:hp-netxtreme2          ########################################### [100%]
+    [root@localhost RPMSRC]# ls /usr/src/redhat/SPECS/
+    hp-netxtreme2.spec</code>
+
+
+
+I then build the binary RPM for hp-netxtreme2 package
+
+    
+    <code>
+    [root@localhost RPMSRC]# rpmbuild -bb /usr/src/redhat/SPECS/hp-netxtreme2.spec
+    ....................
+    ..........
+    ...
+    RPM build errors:
+        Bad exit status from /var/tmp/rpm-tmp.43351 (%build)</code>
+
+
+
+The rpmbuild command failed for me with an exit status of 1. I was about to start making changes to the source be_main.c source file when I found a blog that talked about using drivers from the manufacturer.
+
+The card I was using was the Flex-10 10Gb 2P 530FLB LOM that was manufactured by Broadcom and is part of their Broadcom NetXtreme II product line. I went ahead and cleaned up the SPECS directory by deleting the hp-netxtreme2.spec file that had been generated by installing the rpm source.
+
+I downloaded the Broadcom version of the source from this #link http://www.broadcom.com/support/license.php?file=NXII_10/linux-7.4.27.zip and moved it to the server using the ILO USB mount.
+
+In [part 2](https://fvtool.wordpress.com/2013/04/15/c7000-bl465c-on-centos-5-2-part-2-update-nic-driver-in-initrd-image/) I will talk about how I compled the Broadcom driver and added it into the initrd.img to be able to use ot for pxeboot

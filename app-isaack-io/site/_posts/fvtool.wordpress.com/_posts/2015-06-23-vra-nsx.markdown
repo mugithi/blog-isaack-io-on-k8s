@@ -1,0 +1,212 @@
+---
+author: mugithi
+comments: true
+date: 2015-06-23 20:30:14+00:00
+layout: post
+slug: VMware, NSX
+title:  VMware VRealize Automation - 3 Web tier application using NSX
+wordpress_id: 301
+categories:
+- VMware
+- VRealize Automation
+- NSX
+- Networking
+---
+I was recently working with a customer who needed to deliver a application to his internal consumers. The customer was putting together an application that had the three typical tiers, i.e. application, Web, App Database tiers. The web and app servers had the requirement to sit behind load balancers with VIPs. The Web apps also had the requirement to have external reachability from the outside network. The application servers needed the ability to initiate communication with the outside world but no connections be initiated from outside to the app servers. The database were not allowed to talk to any servers other than the application servers.
+
+
+The resulting application would look like this
+
+![NewImage](http://fvtool.files.wordpress.com/2015/06/inewimage18.png)
+
+The customer was also exploring the idea of being able to develop once and deploy many. The idea was to start development of one application development, then move it to test & QA and then production without having to deploy a new application and only changes to the IP addresses external to the application as shown below.
+
+![NewImage](http://fvtool.files.wordpress.com/2015/06/inewimage17.png)
+
+
+**Solution Architecture**
+
+
+
+The solution involved VRA with NSX. The customer was already using VRA and so all they needed added on was NSX. Using VRA, you can orchestrate network provisioning during the deployment of an application. There are quite a large number of features that you can get with VRA and with NSX but this article is only going to focus on the features that were used to solve the customers business need.
+
+
+
+I was doing research on this topic, I found that there a lot of documentation on how to get started with VRA and NSX, but there was not a lot of information on how to configure VRA to deploy various network topologies using NSX. If someone is looking to get official training implementing VRA with NSX, you can get this from a VMware class titled. From the course outline, VRA and NSX are covered on the last session of the class.
+
+
+
+
+
+
+There are three different Network profiles VRA can be configured with. With a combination of this, you can configure quite a number of topologies.
+
+
+
+
+
+
+
+
+
+
+  1. External - Range of static IP addresses available on the external network
+
+  2. Routed - Range of IP addresses that are routable
+
+  3. Nated
+
+
+    * One:One - Maps one external address to one internal address (DNAT)
+
+    * One:Many - Maps one external address is shared many internal addresses (SNAT)
+
+
+
+
+  4. Private - internal networks that have no connections to the external networks.
+
+
+
+
+
+
+
+This solution was implemented with a combination of this.
+
+**Implementation**
+
+To implement the solution, you need to use the External Network profile, 1:1 and 1:Many NAT network profile and Private network VRA network profiles. You also need to use a Multi-machine blueprint that allows you to map the network profile to a Virtual Machine application.
+
+**Create the network profile found under Infrastructure -> Reservations -> Network Profiles.**
+
+
+
+  1. I have already created my external Network profile titled **EXTERNAL-NETWORK**
+
+
+
+
+![Screen Shot 2015 06 23 at 1 06 06 PM](http://fvtool.files.wordpress.com/2015/06/screen-shot-2015-06-23-at-1-06-06-pm.png)
+
+
+
+
+  2. Create a 1:1 NAT network profile as shown below.
+
+![Screen Shot 2015 06 23 at 1 17 38 PM](http://fvtool.files.wordpress.com/2015/06/screen-shot-2015-06-23-at-1-17-38-pm.png)
+
+
+![Screen Shot 2015 06 23 at 1 17 06 PM](http://fvtool.files.wordpress.com/2015/06/iscreen-shot-2015-06-23-at-1-17-06-pm1.png)
+
+  3. In the same way, create a** 1:MANY NAT** network profile and **private** profile.
+
+
+![Screen Shot 2015 06 23 at 1 56 25 PM](http://fvtool.files.wordpress.com/2015/06/iscreen-shot-2015-06-23-at-1-56-25-pm.png)
+
+
+
+**Security Groups**
+
+In order to make sure that the DB can only talk to the App tier and the app tier can only talk to the Web tier, you need to configure NSX security groups. Security groups are configured in VMware under **Networking and Security ** under service composer.
+
+![NewImage](http://fvtool.files.wordpress.com/2015/06/inewimage19.png)
+
+1. Create a new Security Group and give it the name **WEB-TIER.**
+
+![NewImage](http://fvtool.files.wordpress.com/2015/06/inewimage20.png)
+
+2. You can use either dynamic or static membership rules. Security group membership are the rules that are used to determine what entity will be included in the security group. I am going to create three dynamic membership rules that will select virtual machines with names that start with a particular prefix, for example web **web**.
+
+![Screen Shot 2015 06 24 at 5 17 53 PM](http://fvtool.files.wordpress.com/2015/06/iscreen-shot-2015-06-24-at-5-17-53-pm.png)
+
+Using machine prefix, the blueprints are configured to name the machines with names that identify the tier they belong to.
+
+![NewImage](http://fvtool.files.wordpress.com/2015/06/inewimage27.png)
+
+5. I am also going to create an EXTERNAL-SECURITY-GROUP  a static membership rule to select the external network distributed port group as an object in the security group.
+
+![NewImage](http://fvtool.files.wordpress.com/2015/06/inewimage30.png)
+
+![NewImage](http://fvtool.files.wordpress.com/2015/06/inewimage31.png)
+4. The next step is to create security policies for each one of the security group. Select the security group **Web Tier** and select apply  security policy. Create a new security policy.
+
+![NewImage](http://fvtool.files.wordpress.com/2015/06/inewimage35.png)
+
+5. This policy will allow the web tier to talk to the app tier
+
+![NewImage](http://fvtool.files.wordpress.com/2015/06/inewimage29.png)
+
+6. Under each of the security groups, edit and associate a security policy with each of the security groups.
+
+![NewImage](http://fvtool.files.wordpress.com/2015/06/inewimage36.png)
+
+
+
+**Multi-machine blueprint
+**
+
+
+
+1. When working with NSX, use of multi-machine blueprints is required. You configure multi-machine blueprints under  the**Network TAB** copy the three network-profiles to be part of this application.
+![NewImage](http://fvtool.files.wordpress.com/2015/06/inewimage5.png)
+
+![NewImage](http://fvtool.files.wordpress.com/2015/06/inewimage6.png)
+
+2. Repeat for **1:Many** and **DB** Network profiles
+
+![NewImage](http://fvtool.files.wordpress.com/2015/06/inewimage7.png)
+
+To map the network profiles to a blueprint, we need to use a multi-machine blueprint. I have already pre-created a three blueprints that are going to be used as the base blueprints for the **web**, **app** and **DB** tiers as shown below.
+
+
+
+
+![NewImage](http://fvtool.files.wordpress.com/2015/06/inewimage22.png)
+
+1. Under the **Build Information TAB**, create the multi-machine blueprint, I called mine **3TIER-Application**
+
+![Screen Shot 2015 06 23 at 2 56 49 PM](http://fvtool.files.wordpress.com/2015/06/iscreen-shot-2015-06-23-at-2-56-49-pm.png)
+
+2. Select the pre-configured blueprint to build the seven virtual machine application.
+
+![NewImage](http://fvtool.files.wordpress.com/2015/06/inewimage23.png)
+
+3. Rename the blueprints to match the three tiers and if you choose can select the startup and shutdown order and select the number of servers required in that particular tier.
+![NewImage](http://fvtool.files.wordpress.com/2015/06/inewimage25.png)
+
+4. Edit each of the blueprint's network and add a network adapter. Attach the adapter to the appropriate network profile
+
+![NewImage](http://fvtool.files.wordpress.com/2015/06/inewimage11.png)
+
+5. We will configure load balancers for the  **Application** and **DB** blueprints. Once you add the network adapter and map it to the appropriate tier, select the load balancing tab and select http and https. Select the network adapter, and virtual IP address for the appropriate tier
+
+![NewImage](http://fvtool.files.wordpress.com/2015/06/inewimage26.png)
+
+6. For the web tier, we need to NAT to an External IP so we select the external network profile.
+
+![Screen Shot 2015 06 24 at 4 54 14 PM](http://fvtool.files.wordpress.com/2015/06/iscreen-shot-2015-06-24-at-4-54-14-pm.png)
+
+7. Under the Security tab, select the appropriate security groups that were created earlier.
+
+![NewImage](http://fvtool.files.wordpress.com/2015/06/inewimage37.png)
+
+7. Publish the application and add it to the catalog.
+
+![NewImage](http://fvtool.files.wordpress.com/2015/06/inewimage13.png)
+
+![NewImage](http://fvtool.files.wordpress.com/2015/06/inewimage14.png)
+
+7. The application is now ready to be consumed by the users from the catalog.
+
+![NewImage](http://fvtool.files.wordpress.com/2015/06/inewimage16.png)
+
+**Architecture Review **
+
+
+
+1. Once the application is requested by a user the following components  will be deployed, NSX Edge, Logical Switches that connect the three application tiers.
+
+![NewImage](http://fvtool.files.wordpress.com/2015/06/inewimage21.png)
+
+2. In VCenter you can see the DNAT and SNAT rules. Here you can see that the web tier gets a public Virtual IP and  Application tier gets a private Virtual ip from the load balancers.
