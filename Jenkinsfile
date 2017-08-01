@@ -71,6 +71,7 @@ podTemplate(label: 'pipeline', containers: [
           }
         }
         if (env.BRANCH_NAME == 'master') {
+            def branchName = env.BRANCH_NAME.toLowerCase()
             def appGlobalDNS = configVars.app01.globalDNS
             def appDNS = configVars.app01.name+"."+appGlobalDNS
             def awsRegion = configVars.app01.region
@@ -117,7 +118,7 @@ podTemplate(label: 'pipeline', containers: [
                 ////////////////////////////////////////////////////////////////////////////////
                 container ('helm' ) {
                     println "Starting the install of the helm chart"
-                    sh "helm upgrade --install ${BRANCH_NAME} ingress.hosts=$appDNS $infraFolder --set image.tag=$BUILD_TAG"
+                    sh "helm upgrade --install --set ingress.hosts=$appDNS $branchName $infraFolder --set image.tag=$BUILD_TAG"
 
                 }
                 ////////////////////////////////////////////////////////////////////////////////
@@ -189,7 +190,6 @@ podTemplate(label: 'pipeline', containers: [
                 ////////////////////////////////////////////////////////////////////////////////////
                 println "Starting the install of the helm chart"
                 sh "helm upgrade --install --set ingress.hosts=$nodotappDNS $branchName $infraFolder --set image.tag=$BUILD_TAG"
-                println "Show the output of the helm install"
                 }
 
                 ////////////////////////////////////////////////////////////////////////////////////
