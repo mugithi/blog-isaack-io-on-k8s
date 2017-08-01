@@ -1,12 +1,13 @@
 ---
 layout: post
 title: "Perfect Jenkins workflow Part 01: Jenkins on Kubernetes"
-excerpt: "  "
+excerpt: "My intention was to build Kubernetes enviroment that was auto scaling up/down based on the number of containers/PODs I was running.. "
 categories: [Jenkins,Helm Charts,Terraform, Configuration Management]
+---
 
 ## My Jenkins Workflow 
 
-My intention was to build Kubernetes enviroment that was auto scaling up/down based on the number of containers/PODs I was runnining. My CI/CD tool was Jenkins which built the infrustcture based on a Jenkinsfile that was stored on Github repo. See below for the workflow diagram. 
+My intention was to build Kubernetes enviroment that was auto scaling up/down based on the number of containers/PODs I was running. My CI/CD tool was Jenkins which built the infrustcture based on a Jenkinsfile that was stored on Github repo. See below for the workflow diagram. 
 
 In this post will describe the tools that I used and why I chose them. I subsequent posts, I will go deeper on how the components come together and how the architecture descisions that I made.
 
