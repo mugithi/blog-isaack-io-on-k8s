@@ -64,20 +64,17 @@ podTemplate(label: 'pipeline', containers: [
             }
 
             withCredentials([[$class: 'UsernamePasswordMultiBinding',
-            credentialsId: repoCreds,
-            passwordVariable: 'DOCKER_PASSWORD',
-            usernameVariable: 'DOCKER_USERNAME']]) {
+            credentialsId: 'dockerhub',
+            passwordVariable: 'PASSWORD',
+            usernameVariable: 'USERNAME']]) {
               container('docker') {
-                     sh "docker login -u '$DOCKER_USERNAME' -p '$DOCKER_PASSWORD' "
+                     sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD "
                     //  sh "docker login  -u ${env.DOCKER_USERNAME} -p ${env.DOCKER_PASSWORD} https://index.docker.io/v1/"
                      sh "docker push mugithi/blog:${BUILD_TAG}"
                     }
               }
 
         }
-
-
-
         if (env.BRANCH_NAME == 'master') {
             def appGlobalDNS = configVars.app01.globalDNS
             def appDNS = configVars.app01.name+"."+appGlobalDNS
