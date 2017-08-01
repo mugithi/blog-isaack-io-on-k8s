@@ -5,8 +5,8 @@
 #
 title:       "blog.isaack.io"
 description: "Tools, ideas on infrustrcuture architecture for application delivery"
-url:         https://blog.isaack.io
-enforce_ssl: blog.isaack.io
+url:         https://blog.isaack.io.
+enforce_ssl: blog.isaack.io.
 
 #
 ###################################
@@ -14,7 +14,7 @@ enforce_ssl: blog.isaack.io
 ####################################
 #
 timezone:          America/Los_Angeles
-markdown:          redcarpet 
+markdown:          redcarpet
 #highlighter:       rouge
 #excerpt_separator: <!--more-->
 permalink:         /articles/:year-:month/:title
