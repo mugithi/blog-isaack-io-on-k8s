@@ -57,13 +57,11 @@ podTemplate(label: 'pipeline', containers: [
         stage ('build website and push to dockerhub') {
 
             println "pulling content from github"
+            withCredentials([usernamePassword(credentialsId: 'github', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
             container('docker') {
 
               sh "ls -al"
               sh "docker build -t mugithi/blog:${BUILD_TAG} $appFolder/"
-
-            withCredentials([usernamePassword(credentialsId: 'github', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-
               sh "docker login -u $USERNAME -p $PASSWORD"
               //  sh "docker login  -u ${env.DOCKER_USERNAME} -p ${env.DOCKER_PASSWORD} https://index.docker.io/v1/"
               sh "docker push mugithi/blog:${BUILD_TAG}"
