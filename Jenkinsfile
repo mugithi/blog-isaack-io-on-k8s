@@ -63,10 +63,7 @@ podTemplate(label: 'pipeline', containers: [
             sh "docker build -t mugithi/blog:${BUILD_TAG} $appFolder/"
             }
 
-            withCredentials([[$class: 'UsernamePasswordMultiBinding',
-            credentialsId: 'github',
-            passwordVariable: 'PASSWORD',
-            usernameVariable: 'USERNAME']]) {
+            wwithCredentials([usernamePassword(credentialsId: 'github', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
               container('docker') {
                      sh "docker login -u $USERNAME -p $PASSWORD"
                     //  sh "docker login  -u ${env.DOCKER_USERNAME} -p ${env.DOCKER_PASSWORD} https://index.docker.io/v1/"
