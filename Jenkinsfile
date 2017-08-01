@@ -74,7 +74,7 @@ podTemplate(label: 'pipeline', containers: [
             def appGlobalDNS = configVars.app01.globalDNS
             def appDNS = configVars.app01.name+"."+appGlobalDNS
             def awsRegion = configVars.app01.region
-s
+
             stage ('create chart dns entry' ) {
               container('terraform-aws') {
 
