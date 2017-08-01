@@ -59,18 +59,17 @@ podTemplate(label: 'pipeline', containers: [
             println "pulling content from github"
             container('docker') {
 
-            sh "ls -al"
-            sh "docker build -t mugithi/blog:${BUILD_TAG} $appFolder/"
-            }
+              sh "ls -al"
+              sh "docker build -t mugithi/blog:${BUILD_TAG} $appFolder/"
 
             withCredentials([usernamePassword(credentialsId: 'github', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-              container('docker') {
-                     sh "docker login -u $USERNAME -p $PASSWORD"
-                    //  sh "docker login  -u ${env.DOCKER_USERNAME} -p ${env.DOCKER_PASSWORD} https://index.docker.io/v1/"
-                     sh "docker push mugithi/blog:${BUILD_TAG}"
-                    }
-              }
 
+              sh "docker login -u $USERNAME -p $PASSWORD"
+              //  sh "docker login  -u ${env.DOCKER_USERNAME} -p ${env.DOCKER_PASSWORD} https://index.docker.io/v1/"
+              sh "docker push mugithi/blog:${BUILD_TAG}"
+
+            }
+          }
         }
         if (env.BRANCH_NAME == 'master') {
             def appGlobalDNS = configVars.app01.globalDNS
