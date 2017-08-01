@@ -57,7 +57,7 @@ podTemplate(label: 'pipeline', containers: [
         stage ('build website and push to dockerhub') {
 
             println "pulling content from github"
-            withCredentials([usernamePassword(credentialsId: "dockerhub", usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+            withCredentials([usernamePassword(credentialsId: "github", usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
             container('docker') {
 
               sh "ls -al"
