@@ -56,7 +56,7 @@ podTemplate(label: 'pipeline', containers: [
 
         stage ('build website and push to dockerhub') {
 
-            println "build container and push to dockerhub using credentials $configVars.app.dockerRegistryCreds"
+            println "build container and push to dockerhub using credentials $configVars.app01.dockerRegistryCreds"
             withCredentials([usernamePassword(credentialsId: configVars.app.dockerRegistryCreds, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
             container('docker') {
 
