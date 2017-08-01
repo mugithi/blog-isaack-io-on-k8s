@@ -74,6 +74,7 @@ podTemplate(label: 'pipeline', containers: [
             def branchName = env.BRANCH_NAME.toLowerCase()
             def appGlobalDNS = configVars.app01.globalDNS
             def appDNS = configVars.app01.name+"."+appGlobalDNS
+            String nodotappDNS = appDNS[0..-2]
             def awsRegion = configVars.app01.region
 
             stage ('create chart dns entry' ) {
@@ -118,7 +119,7 @@ podTemplate(label: 'pipeline', containers: [
                 ////////////////////////////////////////////////////////////////////////////////
                 container ('helm' ) {
                     println "Starting the install of the helm chart"
-                    sh "helm upgrade --install --set ingress.hosts=$appDNS $branchName $infraFolder --set image.tag=$BUILD_TAG"
+                    sh "helm upgrade --install --set ingress.hosts=$nodotappDNS $branchName $infraFolder --set image.tag=$BUILD_TAG"
 
                 }
                 ////////////////////////////////////////////////////////////////////////////////
