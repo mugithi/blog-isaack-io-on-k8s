@@ -64,11 +64,11 @@ podTemplate(label: 'pipeline', containers: [
             }
 
             withCredentials([[$class: 'UsernamePasswordMultiBinding',
-            credentialsId: 'dockerhub',
+            credentialsId: 'github',
             passwordVariable: 'PASSWORD',
             usernameVariable: 'USERNAME']]) {
               container('docker') {
-                     sh "docker login -u $USERNAME -p $PASSWORD "
+                     sh "docker login -u $USERNAME -p $PASSWORD https://index.docker.io/v1"
                      sh "echo $USERNAME"
                      sh "echo $PASSWORD"
                     //  sh "docker login  -u ${env.DOCKER_USERNAME} -p ${env.DOCKER_PASSWORD} https://index.docker.io/v1/"
@@ -81,7 +81,7 @@ podTemplate(label: 'pipeline', containers: [
             def appGlobalDNS = configVars.app01.globalDNS
             def appDNS = configVars.app01.name+"."+appGlobalDNS
             def awsRegion = configVars.app01.region
-
+s
             stage ('create chart dns entry' ) {
               container('terraform-aws') {
 
