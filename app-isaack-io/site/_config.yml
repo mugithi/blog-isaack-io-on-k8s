@@ -5,8 +5,8 @@
 #
 title:       "blog.isaack.io"
 description: "Tools, ideas on infrustrcuture architecture for application delivery"
-#url:         https://blog.k8s.executiveglobalsolutions.com
-#enforce_ssl: blog.k8s.executiveglobalsolutions.com
+url:         https://blog.isaack.io
+enforce_ssl: blog.isaack.io
 
 #
 ###################################

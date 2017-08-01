@@ -117,7 +117,7 @@ podTemplate(label: 'pipeline', containers: [
                 ////////////////////////////////////////////////////////////////////////////////
                 container ('helm' ) {
                     println "Starting the install of the helm chart"
-                    sh "helm upgrade --install ${BRANCH_NAME} $infraFolder --set image.tag=$BUILD_TAG"
+                    sh "helm upgrade --install ${BRANCH_NAME} ingress.hosts=$appDNS $infraFolder --set image.tag=$BUILD_TAG"
 
                 }
                 ////////////////////////////////////////////////////////////////////////////////
