@@ -2,7 +2,7 @@
 layout: post
 title: "Perfect Jenkins workflow Part 02: Helm Charts"
 excerpt: "When deploying applications on kubernetes, one typically has to define the Workload resources using a series of yaml files, Helm makes this easier.. "
-categories: [Jenkins,Helm Charts,Terraform, Configuration Management]
+categories: [Jenkins, Helm Charts, Terraform, Configuration Management]
 ---
 
 ## Quick Refresher on life before Helm
@@ -85,7 +85,7 @@ To install this application you would use ```kubectl create -f nginx-ingress-con
  
 ## Hello Helm Charts
  
-I mentioned in the previous blog post that Helm Charts are a package manager for kubernetes - analogous to apt or yum. The goal of Helm charts is to allow people authoring applications to run on Kubernetes to easily package the work they have already done and share it with others. I wount spent much time talking about Helm architecture in this post but the one thing to note is that Helm uses a client server model; Helm(client) runs on your local workstation and Tiller(server) runs on the Kubernetes cluster. You initallize(install tiller server) the cluster by issuing the command ```helm init```. Also you need to have ```kubectl``` installed and configured to talk to your kubernetes cluster.  
+I mentioned in the previous blog post that Helm Charts are a package manager for kubernetes - analogous to apt or yum for linux. The goal of Helm charts is to allow people authoring applications to run on Kubernetes to easily package the work they have already done and share it with others. I wount spent much time talking about Helm architecture in this post but the one thing to note is that Helm uses a client server model; Helm(client) runs on your local workstation and Tiller(server) runs on the Kubernetes cluster. You initallize(install tiller server) the cluster by issuing the command ```helm init```. Also you need to have ```kubectl``` installed and configured to talk to your kubernetes cluster.  
 
 You create a helm chart by issueing the command ```helm create chart-template``` which creates a directory with the following files in it
 
