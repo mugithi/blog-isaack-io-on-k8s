@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "Perfect Jenkins workflow Part 01: Jenkins on Kubernetes"
-excerpt: "My intention was to build Kubernetes enviroment that was auto scaling up/down based on the number of containers/PODs I was running.. "
+title: "Perfect Jenkins workflow Part 02: Helm Charts"
+excerpt: "When deploying applications on kubernetes, one typically has to define the Workload resources using a series of yaml files, Helm makes this easier.. "
 categories: [Jenkins,Helm Charts,Terraform, Configuration Management]
 ---
 
