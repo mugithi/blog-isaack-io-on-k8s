@@ -9,9 +9,9 @@ categories: [Jenkins, Helm Charts, Terraform, Configuration Management]
 
 When deploying applications on kubernetes, one typically has to define the Workload resources using a series of yaml files. Here is an example of an ingress controller single yaml file that describes everything the service, deployment and configMap workload resources.
 
-### ```backend.yaml``` example
+### ~~~backend.yaml~~~ example
 
-```
+~~~
 ---
 kind: Service
 apiVersion: v1
@@ -78,19 +78,19 @@ data:
   enable-vts-status: "true"
 ---
 
-```
+~~~
 
-To install this application you would use ```kubectl create -f nginx-ingress-controller``` with the ```-f``` referencing the path to ```backend.yaml``` file. You could still version your applications by checking in Yaml files but it was a tedious way of deploying applications.
+To install this application you would use ~~~kubectl create -f nginx-ingress-controller~~~ with the ~~~-f~~~ referencing the path to ~~~backend.yaml~~~ file. You could still version your applications by checking in Yaml files but it was a tedious way of deploying applications.
 
 
 ## Hello Helm Charts
 
-I mentioned in the previous blog post that Helm Charts are a package manager for kubernetes - analogous to apt or yum for linux. The goal of Helm charts is to allow people authoring applications to run on Kubernetes to easily package the work they have already done and share it with others. I wount spent much time talking about Helm architecture in this post but the one thing to note is that Helm uses a client server model; Helm(client) runs on your local workstation and Tiller(server) runs on the Kubernetes cluster. You initallize(install tiller server) the cluster by issuing the command ```helm init```. Also you need to have ```kubectl``` installed and configured to talk to your kubernetes cluster.  
+I mentioned in the previous blog post that Helm Charts are a package manager for kubernetes - analogous to apt or yum for linux. The goal of Helm charts is to allow people authoring applications to run on Kubernetes to easily package the work they have already done and share it with others. I wount spent much time talking about Helm architecture in this post but the one thing to note is that Helm uses a client server model; Helm(client) runs on your local workstation and Tiller(server) runs on the Kubernetes cluster. You initallize(install tiller server) the cluster by issuing the command ~~~helm init~~~. Also you need to have ~~~kubectl~~~ installed and configured to talk to your kubernetes cluster.  
 
-You create a helm chart by issueing the command ```helm create chart-template``` which creates a directory with the following files in it
+You create a helm chart by issueing the command ~~~helm create chart-template~~~ which creates a directory with the following files in it
 
 
-```bash
+~~~bash
 ~/ helm create chart-template
 ~/ tree chart-template
 chart-template
@@ -105,16 +105,15 @@ chart-template
 └── values.yaml
 
 2 directories, 7 files
-```
+~~~
 
 The two items to pay special attention to are the Templates folder and Values file
 
-The templates folder contains the YAML discriptions of your kubernetes objects eg deployment, ingress, service, secrets etc. Here is an example of a ```service.yalm and``` ```deployment.yaml``` template for blog.isaack.io
+The templates folder contains the YAML discriptions of your kubernetes objects eg deployment, ingress, service, secrets etc. Here is an example of a ~~~service.yalm and~~~ ~~~deployment.yaml~~~ template for blog.isaack.io
 
-### ```ingress.yaml```
+### ~~~ingress.yaml~~~
 
-```
----
+~~~yaml
 {{- if .Values.ingress.enabled -}}
 {{- $serviceName := include "fullname" . -}}
 {{- $servicePort := .Values.service.externalPort -}}
@@ -146,9 +145,12 @@ spec:
     secretName: {{ .Values.ingress.tls.secretName }}
 {{- end -}}
 ---
-```
-### ```service.yaml```
-```
+~~~
+
+### ~~~service.yaml~~~
+
+
+~~~yaml
 ---
 apiVersion: v1
 kind: Service
@@ -170,11 +172,11 @@ spec:
     app: {{ template "name" . }}
     release: {{ .Release.Name }}
 ---
-```
+~~~
 
-Helm uses the go-templating engine. The values in this templates are computed from the ```values.yaml``` file, see below for the Values.yaml file of blog.isaack.io
+Helm uses the go-templating engine. The values in this templates are computed from the ~~~values.yaml~~~ file, see below for the Values.yaml file of blog.isaack.io
 
-```
+~~~yaml
 # Default values for wordpress-isaack.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
@@ -201,11 +203,11 @@ ingress:
   tls:
     # Secrets must be manually created in the namespace.
     secretName: blog-isaack-io
-```
+~~~
 
-You can check the values being rendered by issuing the command ```helm install --dry-run --debug```
+You can check the values being rendered by issuing the command ~~~helm install --dry-run --debug~~~
 
-```
+~~~ yaml
  helm install infra-isaack-io --dry-run --debug
 [debug] Created tunnel using local port: '51663'
 
@@ -339,14 +341,14 @@ spec:
   - hosts:
     - blog.isaack.io
     secretName: blog-isaack-io
-```
+~~~
 
-In ths chart I don't have the secret creation as part of the chart but I could easily implement that by creating a ```secrets.yaml``` file and adding the applications secrets encoded using base64.
+In ths chart I don't have the secret creation as part of the chart but I could easily implement that by creating a ~~~secrets.yaml~~~ file and adding the applications secrets encoded using base64.
 
 
-It is possible to overide the variables, in my Jenkinsfile, I do this by supplying build values. You overide the variables by using the ```--set``` command. When I run this chart through Jenkins in CI/CD, I overide the image tag variable with the docker image build tag as shown below
+It is possible to overide the variables, in my Jenkinsfile, I do this by supplying build values. You overide the variables by using the ~~~--set~~~ command. When I run this chart through Jenkins in CI/CD, I overide the image tag variable with the docker image build tag as shown below
 
-```bash
+~~~ bash
 helm upgrade --install  ./infra-isaack-io --set image.tag=jenkins-build-master-7 --set ingress.hosts=blog.isaack.io master
 
 LAST DEPLOYED: Tue Aug  1 06:45:46 2017
@@ -372,31 +374,30 @@ NOTES:
   export POD_NAME=$(kubectl get pods --namespace default -l "app=isaack-io,release=master" -o jsonpath="{.items[0].metadata.name}")
   echo "Visit http://127.0.0.1:8080 to use your application"
   kubectl port-forward $POD_NAME 8080:4000
-
-
-```
+~~~
 
 I can also issue the following commands
 
-``` helm rollback``` rollback chart by one version
-``` helm rollback 1``` roll back chart to specific version
+~~~ helm rollback~~~ rollback chart by one version
 
-Helm is getting alot of traction in the Kubernetes community and instead of you writing your own application, you can use work other people have done. You can search for existing helm charts using the command ```helm search```
+~~~ helm rollback 1~~~ roll back chart to specific version
 
-```bash
+Helm is getting alot of traction in the Kubernetes community and instead of you writing your own application, you can use work other people have done. You can search for existing helm charts using the command ~~~helm search~~~
+
+~~~ bash
 ▶ helm search  | grep -i wordpress
 stable/wordpress              	0.6.8  	Web publishing platform for building blogs and ...
 
 github/github/blog-isaack-io-on-k8s  master ✗
-```
+~~~
 
 Here helm is searching through my helm repos configured to find a chart called wordpress. By default Helm comes with two repos preconfigured, incubator and stable but you can add your own.
 
-``` bash
+~~~ bash
 ▶ helm repo list
 NAME     	URL
 incubator	https://kubernetes-charts-incubator.storage.googleapis.com/
 stable   	http://storage.googleapis.com/kubernetes-charts
-```
+~~~
 
 In my next post I will talk about some of the architecture decisions I went with and how I configured https to my applications
