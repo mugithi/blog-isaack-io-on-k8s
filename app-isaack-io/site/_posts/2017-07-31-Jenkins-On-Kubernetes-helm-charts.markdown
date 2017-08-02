@@ -43,7 +43,7 @@ chart-template
 
 The two items to pay special attention to are the Templates folder and Values file
 
-The templates folder contains the YAML discriptions of your kubernetes objects eg deployment, ingress, service, secrets etc. Here is an example of a ```service.yalm and``` ```deployment.yaml``` template for blog.isaack.io
+The templates folder contains the YAML discriptions of your kubernetes objects eg deployment, ingress, service, secrets etc. Here is an example of a ```ingress.yaml``` and  ```service.yaml``` template for blog.isaack.io
 
 ### ```ingress.yaml```
 <script src="https://gist.github.com/mugithi/a45fbb8ec72ab43a0461acb64edc44ae.js"></script>
@@ -61,141 +61,10 @@ Helm uses the go-templating engine. The values in this templates are computed fr
 
 You can check the values being rendered by issuing the command ```helm install --dry-run --debug```
 
-``` yaml
- helm install infra-isaack-io --dry-run --debug
-[debug] Created tunnel using local port: '51663'
 
-[debug] SERVER: "localhost:51663"
+### ```output.yaml```
 
-[debug] Original chart version: ""
-[debug] CHART PATH: /Users/isaackkaranja/github/blog-isaack-io-on-k8s/infra-isaack-io
-
-NAME:   oppulent-lizzard
-REVISION: 1
-RELEASED: Tue Aug  1 08:37:39 2017
-CHART: isaack-io-0.1.0
-USER-SUPPLIED VALUES:
-{}
-
-COMPUTED VALUES:
-image:
-  pullPolicy: Always
-  registry: index.docker.io
-  registrysecrets: myregistrykey
-  repository: mugithi/blog
-  tag: latest
-ingress:
-  annotations:
-    ingress.kubernetes.io/ssl-redirect: "true"
-    kubernetes.io/ingress.class: nginx
-    kubernetes.io/tls-acme: "true"
-  enabled: true
-  hosts: blog.isaack.io
-  tls:
-    secretName: blog-isaack-io
-replicaCount: 1
-resources: {}
-service:
-  externalPort: 4000
-  internalPort: 4000
-  name: isaack-io
-  type: ClusterIP
-
-HOOKS:
-MANIFEST:
-
----
-# Source: isaack-io/templates/service.yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: oppulent-lizzard-isaack-io
-  labels:
-    app: isaack-io
-    chart: isaack-io-0.1.0
-    release: oppulent-lizzard
-    heritage: Tiller
-spec:
-  type: ClusterIP
-  ports:
-    - port: 4000
-      targetPort: 4000
-      protocol: TCP
-      name: isaack-io
-  selector:
-    app: isaack-io
-    release: oppulent-lizzard
----
-# Source: isaack-io/templates/deployment.yaml
-apiVersion: v1
-kind: ReplicationController
-metadata:
-  name: oppulent-lizzard-isaack-io
-  labels:
-    app: isaack-io
-    chart: isaack-io-0.1.0
-    release: oppulent-lizzard
-    heritage: Tiller
-spec:
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        app: isaack-io
-        release: oppulent-lizzard
-    spec:
-      containers:
-        - name: isaack-io
-          image: "index.docker.io/mugithi/blog:latest"
-          imagePullPolicy: Always
-          args:
-             - serve
-             - -H
-             - '0.0.0.0'
-          ports:
-            - containerPort: 4000
-          livenessProbe:
-            httpGet:
-              path: /
-              port: 4000
-          readinessProbe:
-            httpGet:
-              path: /
-              port: 4000
-          resources:
-            {}
-
-      imagePullSecrets:
-        - name: myregistrykey
----
-# Source: isaack-io/templates/ingress.yaml
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  name: oppulent-lizzard-isaack-io
-  labels:
-    app: isaack-io
-    # chart: isaack-io-0.1.0
-    # release: oppulent-lizzard
-    # heritage: Tiller
-  annotations:
-      ingress.kubernetes.io/ssl-redirect: "true"
-      kubernetes.io/ingress.class: "nginx"
-      kubernetes.io/tls-acme: "true"
-spec:
-  rules:
-    - host: blog.isaack.io
-      http:
-        paths:
-          - path: /
-            backend:
-              serviceName: oppulent-lizzard-isaack-io
-              servicePort: 4000
-  tls:
-  - hosts:
-    - blog.isaack.io
-    secretName: blog-isaack-io
-```
+<script src="https://gist.github.com/mugithi/9e3858bdf71f2f52583dd74ff8413f4d.js"></script>
 
 In ths chart I don't have the secret creation as part of the chart but I could easily implement that by creating a ```secrets.yaml``` file and adding the applications secrets encoded using base64.
 
