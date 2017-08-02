@@ -5,8 +5,8 @@
 #
 title:       "blog.isaack.io"
 description: "Tools, ideas on infrustrcuture architecture for application delivery"
-url:         https://blog.isaack.io.
-enforce_ssl: blog.isaack.io.
+url:         https://blog.isaack.io
+enforce_ssl: blog.isaack.io
 
 #
 ###################################
@@ -14,21 +14,19 @@ enforce_ssl: blog.isaack.io.
 ####################################
 #
 timezone:          America/Los_Angeles
-markdown:          kramdown
+markdown:          redcarpet
 #highlighter:       rouge
 #excerpt_separator: <!--more-->
 permalink:         /articles/:year-:month/:title
-+markdown: kramdown
 
-kramdown:
-  hard_wrap: false
-  auto_ids:       true
-  footnote_nr:    1
-  entity_output:  as_char
-  toc_levels:     1..6
-  enable_coderay: false
-  input: GFM
-highlighter: rouge
+# kramdown:
+#   auto_ids:       true
+#   footnote_nr:    1
+#   entity_output:  as_char
+#   toc_levels:     1..6
+#   enable_coderay: false
+#   input: GFM
+
 #
 ###################################
 # Site Owner configuration
@@ -45,3 +43,4 @@ owner:
     analytics:
   github: mugithi
   linkedin: isaackkaranja
+
