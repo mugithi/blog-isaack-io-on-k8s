@@ -14,19 +14,21 @@ enforce_ssl: blog.isaack.io.
 ####################################
 #
 timezone:          America/Los_Angeles
-markdown:          redcarpet
+markdown:          kramdown
 #highlighter:       rouge
 #excerpt_separator: <!--more-->
 permalink:         /articles/:year-:month/:title
++markdown: kramdown
 
-# kramdown:
-#   auto_ids:       true
-#   footnote_nr:    1
-#   entity_output:  as_char
-#   toc_levels:     1..6
-#   enable_coderay: false
-#   input: GFM
-
+kramdown:
+  hard_wrap: false
+  auto_ids:       true
+  footnote_nr:    1
+  entity_output:  as_char
+  toc_levels:     1..6
+  enable_coderay: false
+  input: GFM
+highlighter: rouge
 #
 ###################################
 # Site Owner configuration
