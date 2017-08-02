@@ -114,6 +114,7 @@ The templates folder contains the YAML discriptions of your kubernetes objects e
 ### ```ingress.yaml```
 
 ```
+---
 {{- if .Values.ingress.enabled -}}
 {{- $serviceName := include "fullname" . -}}
 {{- $servicePort := .Values.service.externalPort -}}
@@ -144,9 +145,11 @@ spec:
     - {{ .Values.ingress.hosts }}
     secretName: {{ .Values.ingress.tls.secretName }}
 {{- end -}}
+---
 ```
 ### ```service.yaml```
 ```
+---
 apiVersion: v1
 kind: Service
 metadata:
@@ -166,6 +169,7 @@ spec:
   selector:
     app: {{ template "name" . }}
     release: {{ .Release.Name }}
+---
 ```
 
 Helm uses the go-templating engine. The values in this templates are computed from the ```values.yaml``` file, see below for the Values.yaml file of blog.isaack.io
