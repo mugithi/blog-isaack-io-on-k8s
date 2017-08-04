@@ -10,7 +10,7 @@ RUN apt-get update \
 
 RUN gem install \
   github-pages:99 \
-  jekyll:3.5.1 \
+  jekyll:3.3.1 \
   jekyll-redirect-from:0.11.0  \
   kramdown:1.12.0 \
   rdiscount:2.2.0.1 \
