@@ -5,7 +5,7 @@
 #
 title:       "blog.isaack.io"
 description: "Tools, ideas on infrustrcuture architecture for application delivery"
-url:         https://blog.isaack.io/
+url:         https://blog.isaack.io//
 enforce_ssl: blog.isaack.io/
 
 #
