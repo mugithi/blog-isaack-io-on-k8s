@@ -13,7 +13,7 @@ tags:
 - ucs
 ---
 
-![IMAG0007](http://fvtool.files.wordpress.com/2012/01/imag0007.jpg)
+![IMAG0007](https://fvtool.files.wordpress.com/2012/01/imag0007.jpg)
 
 I just started a new job a few days ago. It looks like I am going to enjoy it. This year I promised myself that for the 365 days, I will do something hard I every day. I am especially happy because it requires that I get out of my shell. I tend to be an introvert, but with this job, I have to fight this every day. 
 
