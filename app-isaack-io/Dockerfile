@@ -9,7 +9,7 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 
 RUN gem install \
-  github-pages:99 \
+  #github-pages:99 \
   jekyll:3.2.1 \
   jekyll-redirect-from:0.11.0  \
   kramdown:1.12.0 \
