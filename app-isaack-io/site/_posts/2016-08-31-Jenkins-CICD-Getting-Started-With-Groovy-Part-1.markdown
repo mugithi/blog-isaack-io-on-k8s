@@ -17,7 +17,7 @@ Groovy is an agile DSL for JVM. Here is an awesome video on getting started with
 
 Jenkins pipelines replaced the old Hudson workflows and are now considered the goto method for writing your CI/CD pipeline. There has always been a option to capture the xml of the job by navigating to ``` https://<jenkinsip>:8080/job/config.xml``` and capturing the xml configuration of the job, but Groovy takes it a step further and gives you a powerfull way to describe your deployment pipline in code. That being said, I had started this exercise of Jenkins + groovy as a way to auto-provision Jenkins without launching its WebGUI but soon came to realize that it will take me quite a bit of work and I still have not found good documentation that describles how to accomplish that, this is made even more complicated to the tie ins to 3rd party products that I need to make.
 
-That being said, there are alot of [Jenkins](http://www.tutorialspoint.com/jenkins/) tutorials out there on the internet so in this post I focus on the Groovy aspects of Jenkins.
+That being said, there are alot of [Jenkins](https://www.tutorialspoint.com/jenkins/) tutorials out there on the internet so in this post I focus on the Groovy aspects of Jenkins.
 
 
 ### Differnces between System vs Job Groovy Scrips
@@ -39,11 +39,11 @@ You can run Jenkins in a Docker container and there is an official docker contai
 
 <script src="https://gist.github.com/mugithi/4ae26ef24f6fd8431c57a731f2baffa8.js"></script>
 
-To configure the Jenkins container, use the following Dockerfile forked from the [official](https://hub.docker.com/_/jenkins/) Docker image.  
+To configure the Jenkins container, use the following Dockerfile forked from the [official](https://hub.docker.com/_/jenkins/) Docker image.
 
 <script src="https://gist.github.com/mugithi/a7fb08d3a45edcdabe6c649377ea98df.js"></script>
 
-If you are converting an existing install to a docker machine, you can pull the versions of plugins installed by using the following command against Jenkins console located at the url ```http://jenkinsurl/script```
+If you are converting an existing install to a docker machine, you can pull the versions of plugins installed by using the following command against Jenkins console located at the url ```https://jenkinsurl/script```
 
 <script src="https://gist.github.com/mugithi/5dd42507568f724199fcfdfdda267a1b.js"></script>
 
@@ -52,7 +52,7 @@ Once you have a list of plugins that you need to install, you would add them to 
 ```
 [jenkins] pwd
 /Users/github/github/jenkins-server/jenkins
-[jenkins] tree .                                                                                         
+[jenkins] tree .
 .
 ├── Dockerfile
 ├── README.md
@@ -92,17 +92,17 @@ This may also be found at: /var/jenkins_home/secrets/initialAdminPassword
 ```
 
 
-After running the container, you can reach the Jenkins port by navigating to port [http://jenkinshost](https://jenkinshost) and you log in using the password from the docker logs.
+After running the container, you can reach the Jenkins port by navigating to port [https://jenkinshost](https://jenkinshost) and you log in using the password from the docker logs.
 
 Now, if configuring a Freestyle Project, it is fairly easy to setup a job using the console or even the groovy DSL and this works as expected. You would go ahead and add your groovy code in either the following two places in the job.
 
 - Execute Groovy as main job or part of a build step.
 
-<img src="http://i.imgur.com/4etNbma.png" width="330">
+<img src="https://i.imgur.com/4etNbma.png" width="330">
 
 - Execuite Groovy Script as part of the post build of a job after the job run completes
 
-<img src="http://i.imgur.com/WzRbIAh.png" width="330">
+<img src="https://i.imgur.com/WzRbIAh.png" width="330">
 
 
 I wanted to use the new pipeline feature with Pipeline as code and nice visualization features. For that I had to install the Pipeline plugin and use the multi-pipeline item. I will describe in the following blog how I got this configured.
