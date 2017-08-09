@@ -24,11 +24,11 @@ There are bascially three types of SSL certificates
 
 A completely approved EV certificate will display the name of the organization in the green text in most browser address bar. Here is an example from Bank of America. Extended Verified Certificates also contain two encryption algorithms, RSA and DSA within the same SSL certificate. An EV is required for ECommerce websites. 
 
-![](https://)
+![](https://raw.githubusercontent.com/mugithi/blog-isaack-io-on-k8s/master/app-isaack-io/site/img/bank-of-america.png)
 
 **Organization Verified Certificates** provides lower level of trust but the CA still checks for the applicants right to use a the domain plus does some vetting of the organization. The OV verification also requires the requester to send organizational documentations to prove business. The verfied Organiation information is displayed to web users by clicking on the Secure Secure Site seal
 
-![](https://)
+![](https://raw.githubusercontent.com/mugithi/blog-isaack-io-on-k8s/master/app-isaack-io/site/img/the-gardian.png)
 
 **Domain Verified Certificates** requires the least level of validation to issue a certificate. The Certificate Authority (CA) will assign this certificate by following automated email verification process and/or confirming domain information through the WHOIS record. Subsequently, these certificates are issued within a few minutes. No organization data is checked or shown in the certificate details. DVs are ideal for news sites, small business, blogs.
 
@@ -64,7 +64,7 @@ Each of the applications helm charts had the values file configured to create th
 ### Jenkins create Route53 DNS entry using Terraform
 In my Jenkins pipeline, for all push to master and github pull requests, I created a DNS entry in route53. I used terrafrom to create the DNS entries. Below is the image of the Jenkins pipeline
 
-![](https://)
+![](https://raw.githubusercontent.com/mugithi/blog-isaack-io-on-k8s/master/app-isaack-io/site/img/Jenkinspipeline.png)
 
 Below is the Jenkinsfile that programatically discribles the Jenkins pipeline
 
