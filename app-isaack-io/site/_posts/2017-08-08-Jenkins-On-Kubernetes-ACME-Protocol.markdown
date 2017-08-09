@@ -95,3 +95,4 @@ Let's encrypt has two modes, production and staging. Staging SSL certificates ar
 The end result of all of this is I get very site I provision using Jenkins, wether for staging or for production, getting deployed with an CA signed SSL certificate as shown below
 
 ![](https://raw.githubusercontent.com/mugithi/blog-isaack-io-on-k8s/master/app-isaack-io/site/img/blog-isaack-io.png)
+
