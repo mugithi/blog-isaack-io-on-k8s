@@ -11,7 +11,7 @@ I am taking a break from writing posts and seeing if I can increase the rate at 
 ## How to build a slack Bot using Test driven design part 01
 
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/5qH8ibTVp18" frameborder="0" allowfullscreen></iframe>
+<iframe width="1024" height="720" src="https://www.youtube.com/embed/5qH8ibTVp18" frameborder="0" allowfullscreen></iframe>
 
 
 
