@@ -8,20 +8,21 @@ categories: [Spark, Machine Learing]
 
 
 #### Big Data Analytics
-There has been a big explosion of the amount of data that is generated on a day to day basis. This has been caused by the amount of instrumentation that is deployed out in our world today,mobile devices, Fridges, Airplanes, ATM machines, Cookies in browsers etc. This instrumentation generates large volumes of data. Big data analysis is the process where you take a large dataset you with a goal to uncover hidden patterns, unknown corelations, market trends and other usefull information. There are two types of Big data analytics
+There has been a big explosion of the amount of data generated on a day to day basis caused by the amount of instrumentation deployed out in our world today; mobile devices, Fridges, Airplanes, ATM machines, Cookies in browsers etc. Big data analysis is the process where you take a large dataset with a goal to uncover hidden patterns, unknown corelations, market trends and other useful information. 
 
+There are two types of Big data analytics:
 - Batch Analytics
 - Real-Time analytics
 
 #### Batch Analytics
 
-This is the proess where you collect data over a period of time from instrumenation store it and processing of it on a historical processing. It is analogous to collecting all your dirty clothes in the wash basket over a period of time and throwing it into the washing machine at one go.
+This is the process where you collect data over a period of time from instrumenation, store it and perform historical processing. It is analogous to collecting all your dirty clothes in the wash basket over a period of time and throwing it into the washing machine at one go.
 
 ![](https://raw.githubusercontent.com/mugithi/blog-isaack-io-on-k8s/master/app-isaack-io/site/img/slack-01.png)
 
 #### Real-Time Analytics
 
-This is the process of analysizing the data as it streams in real-time. One example of this is the real time analysis of  of credit card transactions. To catch/reduce fraud, one of the things banks do is to make sure a customers credit card transactions are all initiated from within a certian region. If it is found that the same credit card has been swipped both in California and in New York within a period of 10 minutes, then one transaction is flaged fradulent transaction and customer is notified of suspicious activies in their account.
+This is the process of analyzing streams of data in real-time. One example of this is the real time analysis of credit card transactions. To catch/reduce fraud, one of the things banks do is to make sure a customers credit card transactions are all initiated from within a certian region. If it is found that the same credit card has been swipped both in California and in New York within a period of 10 minutes, then one transaction is flagged as a fradulent transaction and the customer is notified of suspicious activies in their account.
 
 ![](https://raw.githubusercontent.com/mugithi/blog-isaack-io-on-k8s/master/app-isaack-io/site/img/slack-02.png)
 
@@ -35,20 +36,18 @@ Spark is capable of performing batch processing against large datasets much fast
 
 ![](https://raw.githubusercontent.com/mugithi/blog-isaack-io-on-k8s/master/app-isaack-io/site/img/slack-04.png)
 
-Spark has other advantages such as
-
-- Process data in real time
-- Spark can be programed with mutiple launguages (R, Python, Scala, Java). Hadoop MR is mostly programed in Java. You can layer other products like Hive to give it SQL like capaiblities.
-- Spark can handle data input from multiple data sources eg. HSFS, Cassandra, HBASE, S3, Kafka, MongoDB, JSON,CSV,  ElasticSearch, Parquet, RDMS(MYSQL, Postgress)
+Spark has other advantages such as:
+- Spark can be programed with mutiple launguages (R, Python, Scala, Java). Hadoop MR is mostly programed in Java. You can layer other products like Hive to give it SQL like capabilities.
+- Spark can handle data input from multiple data sources eg. HDFS, Cassandra, HBASE, S3, Kafka, MongoDB, JSON, CSV, ElasticSearch, Parquet, RDMS(MYSQL, Postgress)
 - Spark makes it easy to use with multiple interfaces eg Scala, Java, Python, R, SparkSQL, Spark Streaming, MLib, Graphx
-- **The biggest advantage is that it much faster than Map Reduce**
+- **The biggest advantage is that it is much faster than Map Reduce**
 
 
 ## So Spark is faster, Please remind me how Map Reduce is implemented
 
-In order to understand why Spark is faster, you need to understand how MR works. Suppose we start with the typical word count Map Reduce application. Suppose you have a large sample data of 256MB of a words file and you want to run it against MR job to find out the number of times a certian word appears in the word count.
+In order to understand why Spark is faster, you need to understand how MR works. Let's start with the typical word count Map Reduce application. Suppose you have a large sample data of 256MB of a words file and you want to run it against MR job to find out the number of times a certian word appears in the word count.
 
-- The 256G file will be broken down to two blocks, each block being 128MB in size and stored in HDFS data nodes. In production HDFS, you would typically have a replica set of 3 but for this example we will assume a replica of 1.
+- The 256MB file will be broken down to two blocks, each block being 128MB in size and stored in HDFS data nodes. In production HDFS, you would typically have a replica set of 3 but for this example we will assume a replica of 1.
 
 ![](https://raw.githubusercontent.com/mugithi/blog-isaack-io-on-k8s/master/app-isaack-io/site/img/slack-05.png)
 
@@ -58,7 +57,7 @@ In order to understand why Spark is faster, you need to understand how MR works.
 
 ![](https://raw.githubusercontent.com/mugithi/blog-isaack-io-on-k8s/master/app-isaack-io/site/img/slack-07.png)
 
-- YARN schedules worker containers that will run the the word count process (MR task) and responds to the MRApplication Master container with the location of the new worker node containers. The Node Manager in each worker node manages its own process container and is responsible for restarting it if it dies and killing it once the process is complete. It also reports back to the YARN Resource Manager on its resource usage.
+- YARN schedules worker containers that will run the the word count process (MR task) and responds to the MRApplication Master container with the location of the new worker node containers. The Node Manager in each worker node manages its own process container and is responsible for restarting it if it dies, and killing it once the process is complete. It also reports back to the YARN Resource Manager on its resource usage.
 
 ![](https://raw.githubusercontent.com/mugithi/blog-isaack-io-on-k8s/master/app-isaack-io/site/img/slack-08.png)
 
@@ -80,7 +79,7 @@ In order to understand why Spark is faster, you need to understand how MR works.
 #### - Sort & Shuffle Phase
 
 - All the output of the mapper phase is read from disk of each of the workers and copied on disk to a single worker for the shuffle and sort phase.
-- The data is then then read from disk in the worker and put in memory  for the Sort and Shuffle phase. Please note, if all the data cannot fit memory of the worker, the job will crush. This is a consequence of how map reduce is implemented
+- The data is then then read from disk in the worker and put in memory for the Sort and Shuffle phase. Please note, if all the data cannot fit into the memory of the worker, the job will crush. This is a consequence of how map reduce is implemented
 - The output of the shuffle phase is then written to disk as output 3
 
 ![](https://raw.githubusercontent.com/mugithi/blog-isaack-io-on-k8s/master/app-isaack-io/site/img/slack-11.png)
@@ -90,25 +89,24 @@ In order to understand why Spark is faster, you need to understand how MR works.
 
 ![](https://raw.githubusercontent.com/mugithi/blog-isaack-io-on-k8s/master/app-isaack-io/site/img/slack-12.png)
 
-**Because of the number of times data has to read and written back to disk**, Map reduce implementation is bassically very slow compared to Spark RDD implemntation.
+**Because of the number of times data has to be read and written back to disk**, Map reduce implementation is basically very slow compared to Spark RDD implementation.
 
 
-## So, how is Spark implemented how why is it faster than Map Reduce?
+## So, how is Spark implemented? Why is it faster than Map Reduce?
 
-Spark uses the RDD ( Reselient Distribute Data) objects that reside in memory. Unlike the Map Reduce implementation, a copy of the data always sits in memory rather than having to be read from disk and written to memory in various operations. **Spark is faster than Map Reduce becuase it has an *order* of magnitude lower number of disk operations.**
+Spark uses the RDD (Reselient Distribute Data) objects that reside in memory. Unlike the Map Reduce implementation, a copy of the data always sits in memory rather than having to be read from disk and written to memory in various operations. **Spark is faster than Map Reduce becuase it has an *order* of magnitude lower number of disk operations.**
 
 - Once the data is loaded in memory, it is immutable in memory. Output from Spark Jobs called transforms result in new RDDs being created which in turn become immutable.
-- In case of a node failure, another node with access to the source data will load the data from disk and the data missing from memory is culculated using ASG. This works expecially works well if the data is in HDFS where multiple nodes will have a copy of the data based on HDFS replication factor.
-- All data blocks do not have to the same size unlike Hadoop MR where all blocks are a fixed block size
-- The only Disk IO required is
+- In case of a node failure, another node with access to the source data will load the data from disk and the data missing from memory is calculated using ASG. This works expecially well if the data is in HDFS where multiple nodes will have a copy of the data based on HDFS replication factor.
+- All data blocks do not have to be the same size unlike Hadoop MR where all blocks are a fixed block size
+- The only Disk IO required is:
 	- When you are doing initial read to load the data from disk to memory
-	- During the shuffling of data to different notes
+	- During the shuffling of data to different nodes
 	- When there is not enough memory
 	- When a node fails and data needs to be reloaded from disk.
 - If you do not have enough memory, Spark uses pipelining to make use of efficient use of little memory that you have and job will not fail unlike Hadoop MR.
 
-
-Spark can leverage YARN to do job scheduling similar to Hadoop Map Reduce. In fact you can use the same Map Reduce cluster to run Spark Jobs. Once you submit your Spark jobs to YARN resource manager, it schedules the Spark Application Master Driver in a worker node. The Spark Application Master Driver then talks back to the YARN Resource Manager and requests for nodes that have locality to the data. YARN then spins up executor containers and send that information to the Application Master Spark Driver. The Spark Driver then sends the executor jobs to run as shown below.
+Spark can leverage YARN to do job scheduling similar to Hadoop Map Reduce. In fact, you can use the same Map Reduce cluster to run Spark Jobs. Once you submit your Spark jobs to YARN resource manager, it schedules the Spark Application Master Driver in a worker node. The Spark Application Master Driver then talks back to the YARN Resource Manager and requests for nodes that have locality to the data. YARN then spins up executor containers and sends that information to the Application Master Spark Driver. The Spark Driver then sends the executor jobs to run as shown below.
 
 ![](https://raw.githubusercontent.com/mugithi/blog-isaack-io-on-k8s/master/app-isaack-io/site/img/slack-13.png)
 
@@ -118,16 +116,16 @@ Spark can leverage YARN to do job scheduling similar to Hadoop Map Reduce. In fa
 
 - The first step is that the original data is loaded up to memory in each of the word count containers and is loaded up to memory.
 - Spark **transformation** are functions that take a RDD as the input and produce one or many RDDs as the output. This RDDs reside in memory and are immutable.
-- **Transformations are lazy**, i.e. are not executed immediately. When you create transformations that create RDD objects, their references to memory are created but no data is loaded or methods executed. Hadoop PIG programing also follows lazy evaluation.
+- **Transformations are lazy**, i.e. are not executed immediately. When you create transformations that create RDD objects, their references to memory are created but no data is loaded or methods executed. Hadoop PIG programming also follows lazy evaluation.
 -  Only after calling a Spark Action are transformations executed, this feature allows for memory not to be used up untill it is absolutely needed.
--  Also in the cause of a node failure and the loss of an RDD, the RDD would be recomputed by looking at Direct acylic graph (DAG). More to come on DAGs
+-  Also in the cause of a node failure and the loss of an RDD, the RDD would be recomputed by looking at Direct acyclic graph (DAG). More to come on DAGs
 
 ![](https://raw.githubusercontent.com/mugithi/blog-isaack-io-on-k8s/master/app-isaack-io/site/img/slack-14.png)
 
 **There are two kinds of transformation.**
 
-**Narrow:**  This functions operate a single partition of a parent RDD and can be thought as self sustained. Narrow transofrmations doo not have to move data across the network
-**Wide:** This functions operate on data that "probably" sits in multiple partitions of the parent RDD. This transofmrations typically result in a shuffle where data is moved across the network and the cluster.
+**Narrow:**  This function operates on a single partition of a parent RDD and can be thought of as self sustained. Narrow transofrmations do not have to move data across the network
+**Wide:** This function operates on data that "probably" sits in multiple partitions of the parent RDD. This transformation typically results in a shuffle where data is moved across the network and the cluster.
 
 - In a wide transofmration, during the shuffle phase, Spark moves data between executor memory. Spark spills data to disk when there is more data shuffled onto a single executor machine than can fit in memory.
 
@@ -136,7 +134,7 @@ Spark can leverage YARN to do job scheduling similar to Hadoop Map Reduce. In fa
 - Actions are RDD operations that produce non-RDD values and can be thought as any RDD operation that returns a value of any type but RDD.
 
 
-**A note about DAG**. In this example reducebyKey val -> is dependant on count -> is dependant on allwords -> is dependant on words -> is dependant on "word_count.txt". In spark this is called a **Lineage** and is an example of a  direct acylic graph (DAG) which is maintained by Spark Context.
+**A note about DAG**. In this example reduce by Key val -> is dependant on count -> is dependant on allwords -> is dependant on words -> is dependant on "word_count.txt". In spark this is called a **Lineage** and is an example of a direct acyclic graph (DAG) which is maintained by Spark Context.
 
 ## Spark Ecosystem
 
@@ -144,7 +142,7 @@ Spark can leverage YARN to do job scheduling similar to Hadoop Map Reduce. In fa
 
 ### *Spark Core:*
 
-This is the foundation of Spark, it composed of RDD, Transformations and Actions. There are three Spark APIs
+This is the foundation of Spark, it is composed of RDD, Transformations and Actions. There are three Spark APIs
 
 - **RDDs** This is the main building block of Spark. All higher level APIs decompose to RDDs. In a majority of this blog, I have used the example of using the RDD API
 - *Isssues*
@@ -152,12 +150,12 @@ This is the foundation of Spark, it composed of RDD, Transformations and Actions
 	- Issues with user using RDD API: they cannot be optimized by Spark
 	- Issues with user using RDD API: They are significatnly slow when translated from non JVM languages like Python
 - **DataFrames**
-	- The dataframes API privides a higher level abstraction (DSL) that allows you to use a simple query Lauguage to manipulate data. By using the Dataframs API, user queries can be optimized by Spark. The Spark User starts by writing a unresolved Query plan. This Query plan is then taken taken through Spark **Catalyst** Optimizer optimization to create an RDD, Transformation code and Action. This is a similar process SQL Queries go through before they are executed by an RDMS.
+	- The dataframes API provides a higher level abstraction (DSL) that allows you to use a simple query Lauguage to manipulate data. By using the Dataframs API, user queries can be optimized by Spark. The Spark User starts by writing a unresolved Query plan. This Query plan is then taken  through Spark **Catalyst** Optimizer optimization to create an RDD, Transformation code and Action. This is a similar process SQL Queries go through before they are executed by an RDMS.
 
 ![](https://raw.githubusercontent.com/mugithi/blog-isaack-io-on-k8s/master/app-isaack-io/site/img/slack-19.png)
 
 - Speed
-	- In term of speed, here is graphic from DataBricks (Spark 2.0) comparision between different API lauguages. Note everything is faster including faster than most native RDD Scala
+	- In terms of speed, here is a graphic from DataBricks (Spark 2.0) showing a comparision between different API lauguages. Note everything is faster including faster than most native RDD Scala
 
 ![](https://raw.githubusercontent.com/mugithi/blog-isaack-io-on-k8s/master/app-isaack-io/site/img/slack-20.png)
 
@@ -189,20 +187,20 @@ The workflow of using SparkSQL involves, feeding it data from your datasource (R
 
 In the example I have above, I am using the RDD API that is written in Scala. Since Spark 2.0, it is now considered best practice to do all analytics in Spark SQL which sits on top of DataFrames. The reason is, SparkSQL is able to optimize the RDD Scala code to ensure that little or no shuffling happens during queries.
 
-Also, using SparkSQL is not lazy evaluation.
+Also, using SparkSQL is not a lazy evaluation.
 
 ### *Spark MLlib*
 
-In machine learning there are two kinds of algorythms.
+In machine learning there are two kinds of algorithms.
 
-- **Supervised Algorythms** This is where you already know some part of the output from input and using you goal is create a model to predict something new. Under supervised algorythyms, there are are main categories of algoryhms
+- **Supervised Algorithms** This is where you already know some part of the output from input and using you goal is create a model to predict something new. Under supervised algorithyms, there are are main categories of algorithhms
 	- *Classification*
 		- Naive Bayes
 		- SVM
 	- *Regression*
 		- Linear
 		- Logistic
-- **Unsupervised Algorythms** This is where you dont know have any output in advance. The algoryhms are left with the task of making sense of the output.
+- **Unsupervised Algorithms** This is where you don't have any output in advance. The algorithms are left with the task of making sense of the output.
 	- *Clustering*
 		- K Means
 	- *Dimentionality Reducation*
@@ -211,8 +209,8 @@ In machine learning there are two kinds of algorythms.
 
 ### *GraphX*
 
-A graph is mathematical model used to model relationships between objects. A graph is made up of vertices and edges. Vertices are the objects and edges are the relationships between them. A directed graph is where edges have a direction to them.
+A graph is a mathematical model used to model relationships between objects. A graph is made up of vertices and edges. Vertices are the objects and edges are the relationships between them. A directed graph is where edges have a direction to them.
 
 ![](https://raw.githubusercontent.com/mugithi/blog-isaack-io-on-k8s/master/app-isaack-io/site/img/slack-18.png)
 
-Example of GraphX use cases are Google Maps, culculating multiple routes and showing the most optimal path, Linked in friends recomendations by looking at all your frinds and associations.
+Example of GraphX use cases are Google Maps, calculating multiple routes and showing the most optimal path, Linked in friends recommendations by looking at all your frinds and associations.
