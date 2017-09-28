@@ -160,10 +160,6 @@ The foundation of Spark is composed of RDD, Transformations and Actions. The Spa
 
 ![](https://raw.githubusercontent.com/mugithi/blog-isaack-io-on-k8s/master/app-isaack-io/site/img/slack-19.png)
 
-- Speed
-	- In terms of speed, here is a graphic from DataBricks (Spark 2.0) showing a comparision between different API lauguages. Note everything is faster including faster than most native RDD Scala
-
-![](https://raw.githubusercontent.com/mugithi/blog-isaack-io-on-k8s/master/app-isaack-io/site/img/slack-20.png)
 
 - *Isssues*
 	- Issues with user using DataFrames API: They don't give object type safety that can sometimes only show up after running long lived tasks.
@@ -264,7 +260,6 @@ Like Hive, Pig sits on top of Map Reduce and uses HDFS and Map Reduce
 - Pig reads files from HDFS and stores intermediate records in HDFS and writes final output in HDFS
 - Pig uses Map Reduce to perform ETL operations, it performs optimization of the requested ETL transformations making it very efficient. 
 - Pig does not have to use Map Reduce, but can be used on to of other frameworks like Spark
-
 
 
 
