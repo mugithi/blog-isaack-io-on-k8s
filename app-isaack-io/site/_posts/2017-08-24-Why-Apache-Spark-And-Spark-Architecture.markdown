@@ -5,8 +5,6 @@ excerpt: "There has been a big explosion of the amount of data that is generated
 categories: [Spark, Machine Learing]
 ---
 
-
-
 #### Big Data Analytics
 There has been a big explosion of the amount of data generated on a day to day basis caused by the amount of instrumentation deployed out in our world today; mobile devices, Fridges, Airplanes, ATM machines, Cookies in browsers etc. Big data analysis is the process where you take a large dataset with a goal to uncover hidden patterns, unknown corelations, market trends and other useful information. 
 
@@ -94,9 +92,9 @@ In order to understand why Spark is faster, you need to understand how MR works.
 
 ## So, how is Spark implemented? Why is it faster than Map Reduce?
 
-Spark uses the RDD (Reselient Distribute Data) objects that reside in memory. Unlike the Map Reduce implementation, a copy of the data always sits in memory rather than having to be read from disk and written to memory in various operations. **Spark is faster than Map Reduce becuase it has an *order* of magnitude lower number of disk operations.**
+At its most basic level, Spark uses the RDD (Reselient Distribute Data) objects that reside in memory.  Unlike the Map Reduce implementation, a copy of the data always sits in memory rather than having to be read from disk and written to memory in various operations. **Spark is faster than Map Reduce becuase it has an *order* of magnitude lower number of disk operations.**
 
-- Once the data is loaded in memory, it is immutable in memory. Output from Spark Jobs called transforms result in new RDDs being created which in turn become immutable.
+- RDDs are data loaded in memory. This data is Immutable. When you run a spark job(called a Transformation) against an RDD, the result is a new RDDs. This new RDD is also immutable.
 - In case of a node failure, another node with access to the source data will load the data from disk and the data missing from memory is calculated using ASG. This works expecially well if the data is in HDFS where multiple nodes will have a copy of the data based on HDFS replication factor.
 - All data blocks do not have to be the same size unlike Hadoop MR where all blocks are a fixed block size
 - The only Disk IO required is:
@@ -112,7 +110,9 @@ Spark can leverage YARN to do job scheduling similar to Hadoop Map Reduce. In fa
 
 ### ***There are two phases to a Spark Job.***
 
-### Transformation
+### Transformations
+
+Transformations transform an existing RDD to another RDD.
 
 - The first step is that the original data is loaded up to memory in each of the word count containers and is loaded up to memory.
 - Spark **transformation** are functions that take a RDD as the input and produce one or many RDDs as the output. This RDDs reside in memory and are immutable.
@@ -131,10 +131,12 @@ Spark can leverage YARN to do job scheduling similar to Hadoop Map Reduce. In fa
 
 ### Actions
 
-- Actions are RDD operations that produce non-RDD values and can be thought as any RDD operation that returns a value of any type but RDD.
+- Actions are RDD operations that produce non-RDD values and can be thought as any RDD operation that returns a value of any type but RDD. Typically you call a action when you want a result.
 
+**A note about DAG and Lineage**. 
+- When an RDD is created, it just holds Metadata and not the results. The metadata of an RDD is composed of its transformation and its parent RDD. Using the metadata information, it is possible to recursively follow the ***lineage*** untill you get to the RDD that loads the data on disk and what transformaiton sequence led to the RDD creation. This tranformation are only executed when the results are desired during an **action**. 
 
-**A note about DAG**. In this example reduce by Key val -> is dependant on count -> is dependant on allwords -> is dependant on words -> is dependant on "word_count.txt". In spark this is called a **Lineage** and is an example of a direct acyclic graph (DAG) which is maintained by Spark Context.
+ In this example reduce by Key val -> is dependant on count -> is dependant on allwords -> is dependant on words -> is dependant on "word_count.txt". In spark this is called a **Lineage** and is an example of a direct acyclic graph (DAG) which is maintained by Spark Context.
 
 ## Spark Ecosystem
 
@@ -142,7 +144,11 @@ Spark can leverage YARN to do job scheduling similar to Hadoop Map Reduce. In fa
 
 ### *Spark Core:*
 
-This is the foundation of Spark, it is composed of RDD, Transformations and Actions. There are three Spark APIs
+The Spark Core is just a computing engine. Its architecture is composed of a Storage System(stores the data to be processed) and Cluster Manager(Used to run Spark tasks across a cluster of machines)
+
+![](https://raw.githubusercontent.com/mugithi/blog-isaack-io-on-k8s/master/app-isaack-io/site/img/slack-23.png)
+
+The foundation of Spark is composed of RDD, Transformations and Actions. The Spark Core is written in Scala which as JVMs. There are three Spark APIs. 
 
 - **RDDs** This is the main building block of Spark. All higher level APIs decompose to RDDs. In a majority of this blog, I have used the example of using the RDD API
 - *Isssues*
@@ -214,3 +220,67 @@ A graph is a mathematical model used to model relationships between objects. A g
 ![](https://raw.githubusercontent.com/mugithi/blog-isaack-io-on-k8s/master/app-isaack-io/site/img/slack-18.png)
 
 Example of GraphX use cases are Google Maps, calculating multiple routes and showing the most optimal path, Linked in friends recommendations by looking at all your frinds and associations.
+
+
+### Hadoop Ecosystem
+
+I want to close by discussing a few things that have been layered onto MapReduce to make it much more easier to use.
+
+#### Hive
+
+Without Hive, Map Reduce users have to write Map Reduce Jobs using Java. This is done using three classes
+
+- Map Java Class - Class where the Map logic is implemented
+- Reduce Java Class - Class wehre the redu logic is implmented
+- Main class that implementes the job Object.  - this is main function that cordinates the map calling the map and reduce methods and fields 
+
+Hive is a SQL like interface that sits on top of Map Reduce. SQL is easier to use than Java and here are alot more developers and analysts who know SQL than Java. Here are some of the implemntation details
+
+- Hive sits on top of HDFS and its data is stored as text and birary files partitiioned and replicated across the cluster
+- Hive makes use of parallelizm of processing that you 
+- Hive tanslates SQL queries into MR jobs and submits those jobs to be run in a MR cluster. The MR cluster returns the results to Hive which in turn returns the results to the end HiveQL user. You can use Hive similar to how you would use an RDMS
+- Hive SQL is called HiveSQL - HiveQL is modeled after SQL but supports more built-in functions making it more like a programing lauguage that a Query lauguage. 
+
+![](https://raw.githubusercontent.com/mugithi/blog-isaack-io-on-k8s/master/app-isaack-io/site/img/slack-20.png)
+
+- Hive users see's the data in HDFS in tabular format. Hive uses ***Metastore*** to bridge the translation of the data stored in files in HDFS to tabular format 
+	- Metastore is a RDMS with JDBC driver. In Dev Hive comes with Derby DB, in Production you would use Posgress and MariaDB 10.
+	- Metastore stores metatadata for the mapping of HDFS directories to Hive table an d holds table definaton and schema for each table
+
+Although Hive is SQL database, it should be noted that it cannot be used like a regular RDMS for OLAP. This is because it is not ACID compliant by default and is built run high latency parallel Read Operations that operate on very large datasets. RDMS's on the other hand are ACID compliant and are built for serialised low latency RW operations that operate on small datasets.
+
+
+#### Pig 
+
+Most data that lands in big data systems is unstructured ie has an unknown schema, incomplete data nd has incosistent or records. Pig a transformation lauguage. It is a high level scripting lauguage that allows you to normalize unstructured or incomplete data and load it into HDFS. A typical worfkow would be to take raw un-normalized data, then use Pig to perform ETL (Extract, Transform and Load) and then send it into  HDFS for Hive to perform analysis on. 
+
+![](https://raw.githubusercontent.com/mugithi/blog-isaack-io-on-k8s/master/app-isaack-io/site/img/slack-21.png)
+
+Please note, Pig does not create a relational databases but just creates files that reside in HDFS that have a structured or semi-structured format. Pig uses a lauguage called **PigLatin** that is a procedral, data flow lauguage that can work on multiple sources in parallel to peform ETL. Unlike HiveSQL, PigLatin code looks alot like Python, the have to explicitly describe what you want to happen to the data and Pig will figure out the most optimal way to complete your transoformation request. Unlike Hive which is used by Data Analytists, Pig is used by developers to bring all the data together in one usefull place.
+
+![](https://raw.githubusercontent.com/mugithi/blog-isaack-io-on-k8s/master/app-isaack-io/site/img/slack-22.png)
+
+Like Hive, Pig sits on top of Map Reduce and uses HDFS and Map Reduce
+- Pig reads files from HDFS and stores intermediate records in HDFS and writes final output in HDFS
+- Pig uses Map Reduce to perform ETL operations, it performs optimization of the requested ETL transformations making it very efficient. 
+- Pig does not have to use Map Reduce, but can be used on to of other frameworks like Spark
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
