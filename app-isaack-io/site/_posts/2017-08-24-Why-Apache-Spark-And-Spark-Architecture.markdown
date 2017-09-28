@@ -144,7 +144,7 @@ Transformations transform an existing RDD to another RDD.
 
 ### *Spark Core:*
 
-The Spark Core is just a computing engine. Its architecture is composed of a Storage System(stores the data to be processed) and Cluster Manager(Used to run Spark tasks across a cluster of machines)
+The Spark Core is just a computing engine. Its architecture is composed of a Storage System(stores the data to be processed) and Cluster Manager(Used to run Spark tasks across a cluster of machines). In our case here, we are using the HDFS and the YARN as the Cluster Manager.
 
 ![](https://raw.githubusercontent.com/mugithi/blog-isaack-io-on-k8s/master/app-isaack-io/site/img/slack-23.png)
 
